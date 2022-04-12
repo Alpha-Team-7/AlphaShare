@@ -32,6 +32,11 @@ import { Transactor, Web3ModalSetup } from "./helpers";
 import { ExampleUI } from "./views";
 import { useStaticJsonRPC } from "./hooks";
 
+import Moment from "moment";
+
+import FileBrowser, { Icons } from "react-keyed-file-browser";
+import "font-awesome/css/font-awesome.min.css";
+
 const { ethers } = require("ethers");
 /*
     Welcome to 🏗 scaffold-eth !
@@ -244,6 +249,156 @@ function App(props) {
 
   const faucetAvailable = localProvider && localProvider.connection && targetNetwork.name.indexOf("local") !== -1;
 
+  /******************START  OF FILE MANAGER COMPONENT ********************************** */
+
+  const [state, setState] = useState({
+    files: [
+      {
+        key: "photos/animals/cat in a hat.png",
+        modified: +Moment().subtract(1, "hours"),
+        size: 1.5 * 1024 * 1024,
+      },
+      {
+        key: "photos/animals/kitten_ball.png",
+        modified: +Moment().subtract(3, "days"),
+        size: 545 * 1024,
+      },
+      {
+        key: "photos/animals/elephants.png",
+        modified: +Moment().subtract(3, "days"),
+        size: 52 * 1024,
+      },
+      {
+        key: "photos/funny fall.gif",
+        modified: +Moment().subtract(2, "months"),
+        size: 13.2 * 1024 * 1024,
+      },
+      {
+        key: "photos/holiday.jpg",
+        modified: +Moment().subtract(25, "days"),
+        size: 85 * 1024,
+      },
+      {
+        key: "documents/letter chunks.doc",
+        modified: +Moment().subtract(15, "days"),
+        size: 480 * 1024,
+      },
+      {
+        key: "documents/export.pdf",
+        modified: +Moment().subtract(15, "days"),
+        size: 4.2 * 1024 * 1024,
+      },
+    ],
+  });
+
+  let handleCreateFolder = key => {
+    setState(state => {
+      state.files = state.files.concat([
+        {
+          key: key,
+        },
+      ]);
+      return state;
+    });
+  };
+  let handleCreateFiles = (files, prefix) => {
+    setState(prevState => {
+      const newFiles = files.map(file => {
+        let newKey = prefix;
+        if (prefix !== "" && prefix.substring(prefix.length - 1, prefix.length) !== "/") {
+          newKey += "/";
+        }
+        alert("came here1");
+
+        const invalidChar = ["/", "\\"];
+        if (invalidChar.some(char => file.name.indexOf(char) !== -1)) return;
+        newKey += file.name;
+        return {
+          key: newKey,
+          size: file.size,
+          modified: +Moment(),
+        };
+      });
+
+      alert("came here2");
+
+      const uniqueNewFiles = [];
+      newFiles.forEach(newFile => {
+        const exists = prevState.files.some(existingFile => existingFile.key === newFile.key);
+        if (!exists) uniqueNewFiles.push(newFile);
+      });
+
+      alert("came here3");
+
+      const updatedFiles = [...prevState.files, uniqueNewFiles];
+
+      alert("came here4");
+
+      return { files: updatedFiles };
+    });
+  };
+  let handleRenameFolder = (oldKey, newKey) => {
+    setState(state => {
+      const newFiles = [];
+      state.files.map(file => {
+        if (file.key.substr(0, oldKey.length) === oldKey) {
+          newFiles.push({
+            ...file,
+            key: file.key.replace(oldKey, newKey),
+            modified: +Moment(),
+          });
+        } else {
+          newFiles.push(file);
+        }
+      });
+      state.files = newFiles;
+      return state;
+    });
+  };
+  let handleRenameFile = (oldKey, newKey) => {
+    setState(state => {
+      const newFiles = [];
+      state.files.map(file => {
+        if (file.key === oldKey) {
+          newFiles.push({
+            ...file,
+            key: newKey,
+            modified: +Moment(),
+          });
+        } else {
+          newFiles.push(file);
+        }
+      });
+      state.files = newFiles;
+      return state;
+    });
+  };
+  let handleDeleteFolder = folderKey => {
+    setState(state => {
+      const newFiles = [];
+      state.files.map(file => {
+        if (file.key.substr(0, folderKey.length) !== folderKey) {
+          newFiles.push(file);
+        }
+      });
+      state.files = newFiles;
+      return state;
+    });
+  };
+  let handleDeleteFile = fileKey => {
+    setState(state => {
+      const newFiles = [];
+      state.files.map(file => {
+        if (file.key !== fileKey) {
+          newFiles.push(file);
+        }
+      });
+      state.files = newFiles;
+      return state;
+    });
+  };
+
+  /******************END OF FILE MANAGER COMPONENT ********************************** */
   return (
     <div className="App">
       {/* ✏️ Edit the header and change the title to your project name */}
@@ -260,6 +415,9 @@ function App(props) {
         <Menu.Item key="/exampleui">
           <Link to="/exampleui">ExampleUI</Link>
         </Menu.Item>
+        <Menu.Item key="/filemanager">
+          <Link to="/fileManager">FileManager</Link>
+        </Menu.Item>
       </Menu>
 
       <Switch>
@@ -275,6 +433,20 @@ function App(props) {
             writeContracts={writeContracts}
             readContracts={readContracts}
             purpose={purpose}
+          />
+        </Route>
+        <Route path="/fileManager">
+          <FileBrowser
+            files={state.files}
+            icons={Icons.FontAwesome(4)}
+            onCreateFolder={handleCreateFolder}
+            onCreateFiles={handleCreateFiles}
+            onMoveFolder={handleRenameFolder}
+            onMoveFile={handleRenameFile}
+            onRenameFolder={handleRenameFolder}
+            onRenameFile={handleRenameFile}
+            onDeleteFolder={handleDeleteFolder}
+            onDeleteFile={handleDeleteFile}
           />
         </Route>
       </Switch>
