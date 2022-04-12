@@ -23,6 +23,7 @@ import {
   NetworkDisplay,
   FaucetHint,
   NetworkSwitch,
+  TopNavbar,
 } from "./components";
 import { NETWORKS, ALCHEMY_KEY } from "./constants";
 import externalContracts from "./contracts/external_contracts";
@@ -419,6 +420,7 @@ function App(props) {
           <Link to="/fileManager">FileManager</Link>
         </Menu.Item>
       </Menu>
+      <TopNavbar />
 
       <Switch>
         <Route path="/exampleui">
