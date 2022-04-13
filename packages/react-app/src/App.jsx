@@ -32,6 +32,7 @@ import deployedContracts from "./contracts/hardhat_contracts.json";
 import { Transactor, Web3ModalSetup } from "./helpers";
 import { ExampleUI } from "./views";
 import { useStaticJsonRPC } from "./hooks";
+import { NestedEditableDemo } from "./NestedEditableDemo";
 
 import Moment from "moment";
 
@@ -511,7 +512,7 @@ function App(props) {
   return (
     <div className="App">
       {/* ✏️ Edit the header and change the title to your project name */}
-      <Header style={{width: "100%"}}/>
+      <Header style={{ width: "100%" }} />
       <NetworkDisplay
         NETWORKCHECK={NETWORKCHECK}
         localChainId={localChainId}
@@ -556,7 +557,7 @@ function App(props) {
               marginRight: "15%",
             }}
           > */}
-            <FileBrowser className="file"
+          {/* <FileBrowser className="file"
               files={state.files}
               icons={Icons.FontAwesome(4)}
               onCreateFolder={handleCreateFolder}
@@ -567,7 +568,8 @@ function App(props) {
               onRenameFile={handleRenameFile}
               onDeleteFolder={handleDeleteFolder}
               onDeleteFile={handleDeleteFile}
-            />
+            /> */}
+          <NestedEditableDemo />
           {/* </Table> */}
         </Route>
       </Switch>
