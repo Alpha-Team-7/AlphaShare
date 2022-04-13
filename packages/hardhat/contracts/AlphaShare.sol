@@ -12,7 +12,7 @@ contract AlphaShare {
 
     mapping(uint256 => Folder) folders;
     // mapping of file id to ipfs hash value
-    mapping (uint256 => string) private filsHashes;
+   // mapping (uint256 => string) private filsHashes;
 
     mapping (address => EnumerableSet.UintSet) ownedFiles;
     mapping (address => EnumerableSet.UintSet) sharedFiles;
@@ -28,6 +28,7 @@ contract AlphaShare {
     struct File {
         uint256 Id;
         string Name;
+        string ipfsHash;
         address Owner;
         uint256 FolderId;
         uint256 Size;
@@ -90,6 +91,7 @@ contract AlphaShare {
                "Id:", file.Id,
                ", Name:", file.Name,
                ", Owner:", file.Owner,
+               ", ipfsHash:", file.ipfsHash,
                ", FolderId:", file.FolderId,
                ", Size:", file.Size,
                ", Visibility:", file.Visibility,
