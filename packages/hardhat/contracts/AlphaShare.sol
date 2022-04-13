@@ -13,16 +13,19 @@ contract AlphaShare {
     using EnumerableSet for EnumerableSet.AddressSet; 
 
     mapping(uint256 => File) files;
+
     uint fileCounter = 1;
+
 
     mapping(uint256 => Folder) folders;
     // mapping of file id to ipfs hash value
    // mapping (uint256 => string) private filsHashes;
 
+
     mapping (address => EnumerableSet.UintSet) ownedFiles;
     mapping (address => EnumerableSet.UintSet) sharedFiles;
 
-    event StopFileShare(string fileName, address owner, address sharee);
+
 
     struct Folder {
         string Name;
@@ -38,8 +41,10 @@ contract AlphaShare {
         uint256 FolderId;
         uint256 Size;
         bool Visibility;
+
         //EnumerableSet.AddressSet shared; // just to keep track of number with access
         uint CreatedAt;
+
     }
 
     modifier fileOwner(uint fileId) {
@@ -49,6 +54,24 @@ contract AlphaShare {
     }
 
     modifier hasAccess(uint fileId) {
+
+        require(msg.sender == files[fileId].Owner || files[fileId].shared.contains(msg.sender) || files[fileId].Visibility, "You dont have access to this file");
+        _;
+    }
+
+    event StartFileShare(string fileName, address owner, address sharee);
+
+    function startFileShare(uint fileId, address[] memory addresses) public fileOwner(fileId) {
+        for (uint256 i = 0; i < addresses.length; i++) {
+            File storage file = files[fileId];
+            //file.shared.add(addresses[i]);
+            sharedFiles[msg.sender].add(fileId);
+            emit StartFileShare(file.Name, file.Owner, addresses[i]);
+        }
+    }
+
+  
+
         require(msg.sender == files[fileId].Owner || files[fileId].Visibility, "You dont have access to this file");
         _;
     }
@@ -75,6 +98,7 @@ contract AlphaShare {
         for (uint256 i = 0; i < addresses.length; i++) {
             File storage file = files[fileId];
             //file.shared.remove(addresses[i]);
+
             sharedFiles[msg.sender].remove(fileId);
             emit StopFileShare(file.Name, file.Owner, addresses[i]);
         }
@@ -90,17 +114,21 @@ contract AlphaShare {
     }
     
 
+
     function retreiveOwnedFiles(address user) public view returns(bytes[] memory) {
         bytes[] memory  data;
         uint[] memory owned = ownedFiles[user].values();
+
 
         for (uint256 i = 0; i < owned.length; i++) {
             bytes memory file = fileToJson(files[owned[i]]);
             
             data[i] = file;
         }
+
         return data;
     }
+
 
     function retreiveSharedFiles(address user) public view returns(bytes[] memory) {
         bytes[] memory  data;
