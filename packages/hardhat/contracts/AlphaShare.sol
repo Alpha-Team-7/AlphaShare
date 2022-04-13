@@ -8,13 +8,9 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 ///@notice You can use this contract for the most basic decentralized file sharing operation.
 ///@dev contract under development to enable users to upload files, retrieve files and share files with other users.
 contract AlphaShare {
-<<<<<<< HEAD
-    using EnumerableSet for EnumerableSet.AddressSet;
-=======
 
     using EnumerableSet for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.AddressSet; 
->>>>>>> 9cc9e7def2184e144da81066d035f52628a708a5
 
     mapping(uint256 => File) files;
 
@@ -45,9 +41,6 @@ contract AlphaShare {
         string CreatedAt;
     }
 
-<<<<<<< HEAD
-    function stopShare(uint256 fileId, address[] memory addresses) public {
-=======
     modifier fileOwner(uint fileId) {
         require(msg.sender == files[fileId].Owner, "You are not the file owner");
         _;
@@ -60,7 +53,6 @@ contract AlphaShare {
     }
 
     function stopShare(uint fileId, address[] memory addresses) public fileOwner(fileId) {
->>>>>>> 9cc9e7def2184e144da81066d035f52628a708a5
         for (uint256 i = 0; i < addresses.length; i++) {
             File storage file = files[fileId];
             file.shared.remove(addresses[i]);
@@ -69,9 +61,6 @@ contract AlphaShare {
         }
     }
 
-<<<<<<< HEAD
-    function updateFileAccess() public {}
-=======
     function updateFileAccess(uint fileId, bool visible) public fileOwner(fileId) {
         files[fileId].Visibility = visible;
     }
@@ -115,5 +104,4 @@ contract AlphaShare {
             );
         return json;
     }
->>>>>>> 9cc9e7def2184e144da81066d035f52628a708a5
 }
