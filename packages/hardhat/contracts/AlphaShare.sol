@@ -3,6 +3,10 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
+///@title A File sharing and storage PoC for a Decentralized Library
+///@author AlphaShare Team
+///@notice You can use this contract for the most basic decentralized file sharing operation.
+///@dev contract under development to enable users to upload files, retrieve files and share files with other users.
 contract AlphaShare {
 
     using EnumerableSet for EnumerableSet.UintSet;

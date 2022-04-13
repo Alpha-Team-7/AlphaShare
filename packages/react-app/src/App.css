@@ -1,6 +1,9 @@
 @import '../../../node_modules/react-keyed-file-browser/dist/react-keyed-file-browser.css';
 
 .App {
-  text-align: center;
-  padding-left: calc(100vw - 100%);
+    text-align: center;
+    width: 70%;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
 }
