@@ -1,4 +1,4 @@
-const {create, globSource} = require("ipfs-http-client");
+const { create, globSource } = require("ipfs-http-client");
 const chalk = require("chalk");
 const { clearLine } = require("readline");
 
@@ -6,26 +6,46 @@ const infura = { host: "ipfs.infura.io", port: "5001", protocol: "https" };
 // run your own ipfs daemon: https://docs.ipfs.io/how-to/command-line-quick-start/#install-ipfs
 // const localhost = { host: "localhost", port: "5001", protocol: "http" };
 
-const ipfs =  create(infura);
+const ipfs = create(infura);
 
 const ipfsGateway = "https://ipfs.io/ipfs/";
 const ipnsGateway = "https://ipfs.io/ipns/";
 
 const addOptions = {
   pin: true,
-  wrapWithDirectory: true
+  wrapWithDirectory: true,
 };
 
 const pushDirectoryToIPFS = async path => {
   try {
-    const file = ipfs.addAll(globSource(path, '**/*'), addOptions)
+    const file = ipfs.addAll(globSource(path, "**/*"), addOptions);
     let lastRes;
     for await (const f of file) {
-      lastRes = f
+      lastRes = f;
     }
-    return lastRes
+    return lastRes;
   } catch (e) {
     return {};
+  }
+};
+
+const uploadOne = async file => {
+  try {
+    const result = await ipfs.add(file);
+    return { hash: result.path, size: result.size, name: file.name };
+  } catch (e) {
+    return {};
+  }
+};
+
+const uploadMany = async files => {
+  try {
+    const result = await Promise.all(ipfs.addAll(files));
+    return result.map((file, index) => {
+      return { hash: file.path, size: file.size, name: files[index].name };
+    });
+  } catch (e) {
+    return [];
   }
 };
 
