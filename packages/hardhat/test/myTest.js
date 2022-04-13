@@ -4,7 +4,7 @@ const { solidity } = require("ethereum-waffle");
 
 use(solidity);
 
-describe("My Dapp", function () {
+describe("IPFS", function () {
   let alphaShare;
 
   // quick fix to let gas reporter fetch data from gas station & coinmarketcap
