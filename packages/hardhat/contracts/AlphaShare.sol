@@ -55,11 +55,12 @@ contract AlphaShare {
 
     modifier hasAccess(uint fileId) {
 
-        require(msg.sender == files[fileId].Owner || files[fileId].shared.contains(msg.sender) || files[fileId].Visibility, "You dont have access to this file");
+        require(msg.sender == files[fileId].Owner || sharedFiles[msg.sender].contains(fileId) || files[fileId].Visibility, "You dont have access to this file");
         _;
     }
 
     event StartFileShare(string fileName, address owner, address sharee);
+    event StopFileShare(string fileName, address owner, address sharee);
 
     function startFileShare(uint fileId, address[] memory addresses) public fileOwner(fileId) {
         for (uint256 i = 0; i < addresses.length; i++) {
@@ -70,11 +71,6 @@ contract AlphaShare {
         }
     }
 
-  
-
-        require(msg.sender == files[fileId].Owner || files[fileId].Visibility, "You dont have access to this file");
-        _;
-    }
 
     function addFile(string calldata name, string calldata ipfsHash, uint size) public {
 
