@@ -13,6 +13,7 @@ contract AlphaShare {
     using EnumerableSet for EnumerableSet.AddressSet; 
 
     mapping(uint256 => File) files;
+    uint fileCounter = 1;
 
     mapping(uint256 => Folder) folders;
     // mapping of file id to ipfs hash value
@@ -37,8 +38,8 @@ contract AlphaShare {
         uint256 FolderId;
         uint256 Size;
         bool Visibility;
-        EnumerableSet.AddressSet shared; // just to keep track of number with access
-        string CreatedAt;
+        //EnumerableSet.AddressSet shared; // just to keep track of number with access
+        uint CreatedAt;
     }
 
     modifier fileOwner(uint fileId) {
@@ -48,14 +49,32 @@ contract AlphaShare {
     }
 
     modifier hasAccess(uint fileId) {
-        require(msg.sender == files[fileId].Owner || files[fileId].shared.contains(msg.sender) || files[fileId].Visibility, "You dont have access to this file");
+        require(msg.sender == files[fileId].Owner || files[fileId].Visibility, "You dont have access to this file");
         _;
     }
 
-    function stopShare(uint fileId, address[] memory addresses) public fileOwner(fileId) {
+    function addFile(string calldata name, string calldata ipfsHash, uint size) public {
+
+        File memory file = File({
+            Name: name,
+            Id: fileCounter,
+            ipfsHash: ipfsHash,
+            Owner: msg.sender,
+            FolderId: 1,
+            Size: size,
+            Visibility: true,
+            CreatedAt: block.timestamp
+        });
+
+        files[fileCounter] = file;
+        fileCounter++;
+
+    }
+
+    function stopShare(uint fileId, address[] calldata addresses) public fileOwner(fileId) {
         for (uint256 i = 0; i < addresses.length; i++) {
             File storage file = files[fileId];
-            file.shared.remove(addresses[i]);
+            //file.shared.remove(addresses[i]);
             sharedFiles[msg.sender].remove(fileId);
             emit StopFileShare(file.Name, file.Owner, addresses[i]);
         }
@@ -71,18 +90,24 @@ contract AlphaShare {
     }
     
 
-    function retreiveFiles(address user) public view returns(bytes[] memory) {
+    function retreiveOwnedFiles(address user) public view returns(bytes[] memory) {
         bytes[] memory  data;
         uint[] memory owned = ownedFiles[user].values();
-        uint[] memory shared = sharedFiles[user].values();
 
         for (uint256 i = 0; i < owned.length; i++) {
             bytes memory file = fileToJson(files[owned[i]]);
             
             data[i] = file;
         }
-        for (uint256 i = data.length; i < shared.length + data.length; i++) {
-            bytes memory file = fileToJson(files[owned[i]]);
+        return data;
+    }
+
+    function retreiveSharedFiles(address user) public view returns(bytes[] memory) {
+        bytes[] memory  data;
+        uint[] memory shared = sharedFiles[user].values();
+
+        for (uint256 i = 0; i < shared.length; i++) {
+            bytes memory file = fileToJson(files[shared[i]]);
             data[i] = file;
         }
         return data;
