@@ -4,27 +4,27 @@ const { solidity } = require("ethereum-waffle");
 
 use(solidity);
 
-describe("My Dapp", function () {
-  let myContract;
+describe("IPFS", function () {
+  let alphaShare;
 
   // quick fix to let gas reporter fetch data from gas station & coinmarketcap
   before((done) => {
     setTimeout(done, 2000);
   });
 
-  describe("YourContract", function () {
-    it("Should deploy YourContract", async function () {
-      const YourContract = await ethers.getContractFactory("YourContract");
+  describe("AlphaShare", function () {
+    it("Should deploy AlphaShare", async function () {
+      const AlphaShare = await ethers.getContractFactory("AlphaShare");
 
-      myContract = await YourContract.deploy();
+      alphaShare = await AlphaShare.deploy();
     });
 
     describe("setPurpose()", function () {
       it("Should be able to set a new purpose", async function () {
         const newPurpose = "Test Purpose";
 
-        await myContract.setPurpose(newPurpose);
-        expect(await myContract.purpose()).to.equal(newPurpose);
+        await alphaShare.setPurpose(newPurpose);
+        expect(await alphaShare.purpose()).to.equal(newPurpose);
       });
 
       it("Should emit a SetPurpose event ", async function () {
@@ -32,8 +32,8 @@ describe("My Dapp", function () {
 
         const newPurpose = "Another Test Purpose";
 
-        expect(await myContract.setPurpose(newPurpose))
-          .to.emit(myContract, "SetPurpose")
+        expect(await alphaShare.setPurpose(newPurpose))
+          .to.emit(alphaShare, "SetPurpose")
           .withArgs(owner.address, newPurpose);
       });
     });

@@ -1,4 +1,4 @@
-import { Button, Col, Menu, Row } from "antd";
+import { Button, Col, Menu, Row, Table } from "antd";
 import "antd/dist/antd.css";
 import {
   useBalance,
@@ -23,6 +23,7 @@ import {
   NetworkDisplay,
   FaucetHint,
   NetworkSwitch,
+  TopNavbar,
 } from "./components";
 import { NETWORKS, ALCHEMY_KEY } from "./constants";
 import externalContracts from "./contracts/external_contracts";
@@ -251,6 +252,114 @@ function App(props) {
 
   /******************START  OF FILE MANAGER COMPONENT ********************************** */
 
+  // const columns = [
+  //   {
+  //     title: "File",
+  //     dataIndex: "key",
+  //     key: "key",
+  //   },
+
+  //   {
+  //     title: "Size",
+  //     dataIndex: "size",
+  //     key: "key",
+  //   },
+
+  //   {
+  //     title: "Last Modified",
+  //     dataIndex: "modified",
+  //     key: "key",
+  //   },
+  // ];
+
+  // const columns = [
+  //   {
+  //     title: "File",
+  //     dataIndex: "file",
+  //     filters: [
+  //       {
+  //         text: "Joe",
+  //         value: "Joe",
+  //       },
+  //       {
+  //         text: "Jim",
+  //         value: "Jim",
+  //       },
+  //       {
+  //         text: "Submenu",
+  //         value: "Submenu",
+  //         children: [
+  //           {
+  //             text: "Green",
+  //             value: "Green",
+  //           },
+  //           {
+  //             text: "Black",
+  //             value: "Black",
+  //           },
+  //         ],
+  //       },
+  //     ],
+  //     // specify the condition of filtering result
+  //     // here is that finding the name started with `value`
+  //     onFilter: (value, record) => record.name.indexOf(value) === 0,
+  //     sorter: (a, b) => a.name.length - b.name.length,
+  //     sortDirections: ["descend"],
+  //   },
+  //   {
+  //     title: "Size",
+  //     dataIndex: "size",
+  //     defaultSortOrder: "descend",
+  //     sorter: (a, b) => a.age - b.age,
+  //   },
+  //   {
+  //     title: "Last Modified",
+  //     dataIndex: "last modified",
+  //     filters: [
+  //       {
+  //         text: "London",
+  //         value: "London",
+  //       },
+  //       {
+  //         text: "New York",
+  //         value: "New York",
+  //       },
+  //     ],
+  //     onFilter: (value, record) => record.address.indexOf(value) === 0,
+  //   },
+  // ];
+
+  // const data = [
+  //   {
+  //     key: "1",
+  //     name: "John Brown",
+  //     age: 32,
+  //     address: "New York No. 1 Lake Park",
+  //   },
+  //   {
+  //     key: "2",
+  //     name: "Jim Green",
+  //     age: 42,
+  //     address: "London No. 1 Lake Park",
+  //   },
+  //   {
+  //     key: "3",
+  //     name: "Joe Black",
+  //     age: 32,
+  //     address: "Sidney No. 1 Lake Park",
+  //   },
+  //   {
+  //     key: "4",
+  //     name: "Jim Red",
+  //     age: 32,
+  //     address: "London No. 2 Lake Park",
+  //   },
+  // ];
+
+  // function onChange(filters, sorter, extra) {
+  //   console.log("params", filters, sorter, extra);
+  // }
+
   const [state, setState] = useState({
     files: [
       {
@@ -402,7 +511,7 @@ function App(props) {
   return (
     <div className="App">
       {/* ✏️ Edit the header and change the title to your project name */}
-      <Header />
+      <Header style={{width: "100%"}}/>
       <NetworkDisplay
         NETWORKCHECK={NETWORKCHECK}
         localChainId={localChainId}
@@ -412,16 +521,17 @@ function App(props) {
         USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
       />
       <Menu style={{ textAlign: "center", marginTop: 40 }} selectedKeys={[location.pathname]} mode="horizontal">
-        <Menu.Item key="/exampleui">
+        {/* <Menu.Item key="/exampleui">
           <Link to="/exampleui">ExampleUI</Link>
-        </Menu.Item>
+        </Menu.Item> */}
         <Menu.Item key="/filemanager">
           <Link to="/fileManager">FileManager</Link>
         </Menu.Item>
       </Menu>
+      <TopNavbar />
 
       <Switch>
-        <Route path="/exampleui">
+        {/* <Route path="/exampleui">
           <ExampleUI
             address={address}
             userSigner={userSigner}
@@ -434,20 +544,31 @@ function App(props) {
             readContracts={readContracts}
             purpose={purpose}
           />
-        </Route>
+        </Route> */}
         <Route path="/fileManager">
-          <FileBrowser
-            files={state.files}
-            icons={Icons.FontAwesome(4)}
-            onCreateFolder={handleCreateFolder}
-            onCreateFiles={handleCreateFiles}
-            onMoveFolder={handleRenameFolder}
-            onMoveFile={handleRenameFile}
-            onRenameFolder={handleRenameFolder}
-            onRenameFile={handleRenameFile}
-            onDeleteFolder={handleDeleteFolder}
-            onDeleteFile={handleDeleteFile}
-          />
+          {/* <Table
+            columns={columns} dataSource={data} onChange={onChange}
+            style={{
+              width: "70%",
+              textAlign: "center",
+              marginTop: 40,
+              marginLeft: "15%",
+              marginRight: "15%",
+            }}
+          > */}
+            <FileBrowser className="file"
+              files={state.files}
+              icons={Icons.FontAwesome(4)}
+              onCreateFolder={handleCreateFolder}
+              onCreateFiles={handleCreateFiles}
+              onMoveFolder={handleRenameFolder}
+              onMoveFile={handleRenameFile}
+              onRenameFolder={handleRenameFolder}
+              onRenameFile={handleRenameFile}
+              onDeleteFolder={handleDeleteFolder}
+              onDeleteFile={handleDeleteFile}
+            />
+          {/* </Table> */}
         </Route>
       </Switch>
 
