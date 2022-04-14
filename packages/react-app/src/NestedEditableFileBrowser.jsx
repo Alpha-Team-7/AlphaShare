@@ -20,38 +20,45 @@ export const NestedEditableFileBrowser = ({ tx, contract }) => {
           key: key,
         },
       ]);
+
+      console.log(_files);
       return _files;
     });
   };
-  const handleCreateFiles = (files, prefix) => {
-    setFiles(_files => {
-      const newFiles = files.map(file => {
-        let newKey = prefix;
-        if (prefix !== "" && prefix.substring(prefix.length - 1, prefix.length) !== "/") {
-          newKey += "/";
-        }
-        newKey += file.name;
-        return {
-          key: newKey,
-          size: file.size,
-          modified: +Moment(),
-        };
-      });
+  const handleCreateFiles = (_files, prefix) => {
+    const newFiles = _files.map(file => {
+      let newKey = prefix;
+      if (prefix !== "" && prefix.substring(prefix.length - 1, prefix.length) !== "/") {
+        newKey += "/";
+      }
+      newKey += file.name;
+      return {
+        key: newKey,
+        size: file.size,
+        modified: +Moment(),
+      };
+    });
 
-      const uniqueNewFiles = [];
-      newFiles.map(newFile => {
-        let exists = false;
-        _files.map(existingFile => {
-          if (existingFile.key === newFile.key) {
-            exists = true;
-          }
-        });
-        if (!exists) {
-          uniqueNewFiles.push(newFile);
+    // upload Files to IPFS
+
+    const uniqueNewFiles = [];
+    newFiles.map(newFile => {
+      let exists = false;
+      files.map(existingFile => {
+        if (existingFile.key === newFile.key) {
+          exists = true;
         }
+        return null;
       });
-      _files = _files.concat(uniqueNewFiles);
-      return _files;
+      if (!exists) {
+        uniqueNewFiles.push(newFile);
+      }
+      return null;
+    });
+
+    setFiles(prev => {
+      prev = prev.concat(uniqueNewFiles);
+      return prev;
     });
   };
   const handleRenameFolder = (oldKey, newKey) => {
@@ -102,7 +109,9 @@ export const NestedEditableFileBrowser = ({ tx, contract }) => {
       return _files;
     });
   };
-  const handleDeleteFile = fileKey => {
+  const handleShareFile = fileKey => {
+    alert("came hrer to share file");
+    console.log(fileKey);
     setFiles(_files => {
       const newFiles = [];
       _files.map(file => {
@@ -127,7 +136,7 @@ export const NestedEditableFileBrowser = ({ tx, contract }) => {
         };
       }),
     );
-  }
+  };
 
   return (
     <>
@@ -144,7 +153,7 @@ export const NestedEditableFileBrowser = ({ tx, contract }) => {
         onRenameFolder={handleRenameFolder}
         onRenameFile={handleRenameFile}
         onDeleteFolder={handleDeleteFolder}
-        onDeleteFile={handleDeleteFile}
+        onDeleteFile={handleShareFile}
       />
     </>
   );
