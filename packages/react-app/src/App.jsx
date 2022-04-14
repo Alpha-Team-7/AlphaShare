@@ -31,7 +31,7 @@ import externalContracts from "./contracts/external_contracts";
 import deployedContracts from "./contracts/hardhat_contracts.json";
 import { Transactor, Web3ModalSetup } from "./helpers";
 import { useStaticJsonRPC } from "./hooks";
-import { NestedEditableDemo } from "./NestedEditableDemo";
+import { NestedEditableFileBrowser } from "./NestedEditableFileBrowser";
 
 import Moment from "moment";
 
@@ -396,7 +396,7 @@ function App(props) {
 
       <Switch>
         <Route path="/fileManager">
-          <NestedEditableDemo contract={writeContracts.AlphaShare} tx={tx} />
+          <NestedEditableFileBrowser contract={writeContracts.AlphaShare} tx={tx} />
         </Route>
       </Switch>
 
