@@ -8,24 +8,21 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 ///@notice You can use this contract for the most basic decentralized file sharing operation.
 ///@dev contract under development to enable users to upload files, retrieve files and share files with other users.
 contract AlphaShare {
-
     using EnumerableSet for EnumerableSet.UintSet;
-    using EnumerableSet for EnumerableSet.AddressSet; 
+    using EnumerableSet for EnumerableSet.AddressSet;
 
     mapping(uint256 => File) files;
 
-    uint fileCounter = 1;
-
+    uint256 fileCounter = 1;
+    uint256 folderCounter = 1;
 
     mapping(uint256 => Folder) folders;
     // mapping of file id to ipfs hash value
-   // mapping (uint256 => string) private filsHashes;
+    // mapping (uint256 => string) private filsHashes;
 
-
-    mapping (address => EnumerableSet.UintSet) ownedFiles;
-    mapping (address => EnumerableSet.UintSet) sharedFiles;
-
-
+    mapping(address => EnumerableSet.UintSet) ownedFiles;
+    mapping(address => EnumerableSet.UintSet) ownedFolders;
+    mapping(address => EnumerableSet.UintSet) sharedFiles;
 
     struct Folder {
         string Name;
@@ -41,27 +38,35 @@ contract AlphaShare {
         uint256 FolderId;
         uint256 Size;
         bool Visibility;
-
         //EnumerableSet.AddressSet shared; // just to keep track of number with access
-        uint CreatedAt;
-
+        uint256 CreatedAt;
     }
 
-    modifier fileOwner(uint fileId) {
-        require(msg.sender == files[fileId].Owner, "You are not the file owner");
+    modifier fileOwner(uint256 fileId) {
+        require(
+            msg.sender == files[fileId].Owner,
+            "You are not the file owner"
+        );
         _;
-
     }
 
-    modifier hasAccess(uint fileId) {
-
-        require(msg.sender == files[fileId].Owner || files[fileId].shared.contains(msg.sender) || files[fileId].Visibility, "You dont have access to this file");
+    modifier hasAccess(uint256 fileId) {
+        require(
+            msg.sender == files[fileId].Owner ||
+                sharedFiles[msg.sender].contains(fileId) ||
+                files[fileId].Visibility,
+            "You dont have access to this file"
+        );
         _;
     }
 
     event StartFileShare(string fileName, address owner, address sharee);
+    event StopFileShare(string fileName, address owner, address sharee);
 
-    function startFileShare(uint fileId, address[] memory addresses) public fileOwner(fileId) {
+    function startFileShare(uint256 fileId, address[] memory addresses)
+        public
+        fileOwner(fileId)
+    {
         for (uint256 i = 0; i < addresses.length; i++) {
             File storage file = files[fileId];
             //file.shared.add(addresses[i]);
@@ -70,20 +75,18 @@ contract AlphaShare {
         }
     }
 
-  
-
-        require(msg.sender == files[fileId].Owner || files[fileId].Visibility, "You dont have access to this file");
-        _;
-    }
-
-    function addFile(string calldata name, string calldata ipfsHash, uint size) public {
-
+    function addFile(
+        string calldata name,
+        string calldata ipfsHash,
+        uint256 size,
+        uint256 folderId
+    ) public {
         File memory file = File({
             Name: name,
             Id: fileCounter,
             ipfsHash: ipfsHash,
             Owner: msg.sender,
-            FolderId: 1,
+            FolderId: folderId,
             Size: size,
             Visibility: true,
             CreatedAt: block.timestamp
@@ -91,10 +94,24 @@ contract AlphaShare {
 
         files[fileCounter] = file;
         fileCounter++;
-
     }
 
-    function stopShare(uint fileId, address[] calldata addresses) public fileOwner(fileId) {
+    function addFolder(uint parentFolderId, string memory name) public {
+        Folder storage folder = folders[folderCounter];
+        folder.Name = name;
+        folder.Id = folderCounter;
+
+        ownedFolders[msg.sender].add(folderCounter);
+        folderCounter++;
+    }
+
+    documents - 7
+        hello - 6
+            hi - 4
+    function stopShare(uint256 fileId, address[] calldata addresses)
+        public
+        fileOwner(fileId)
+    {
         for (uint256 i = 0; i < addresses.length; i++) {
             File storage file = files[fileId];
             //file.shared.remove(addresses[i]);
@@ -104,35 +121,47 @@ contract AlphaShare {
         }
     }
 
-    function updateFileAccess(uint fileId, bool visible) public fileOwner(fileId) {
+    function updateFileAccess(uint256 fileId, bool visible)
+        public
+        fileOwner(fileId)
+    {
         files[fileId].Visibility = visible;
     }
 
-    function retreiveFile(uint fileId) public view hasAccess(fileId) returns(bytes memory) {
+    function retreiveFile(uint256 fileId)
+        public
+        view
+        hasAccess(fileId)
+        returns (bytes memory)
+    {
         File storage file = files[fileId];
         return fileToJson(file);
     }
-    
 
-
-    function retreiveOwnedFiles(address user) public view returns(bytes[] memory) {
-        bytes[] memory  data;
-        uint[] memory owned = ownedFiles[user].values();
-
+    function retreiveOwnedFiles(address user)
+        public
+        view
+        returns (bytes[] memory)
+    {
+        bytes[] memory data;
+        uint256[] memory owned = ownedFiles[user].values();
 
         for (uint256 i = 0; i < owned.length; i++) {
             bytes memory file = fileToJson(files[owned[i]]);
-            
+
             data[i] = file;
         }
 
         return data;
     }
 
-
-    function retreiveSharedFiles(address user) public view returns(bytes[] memory) {
-        bytes[] memory  data;
-        uint[] memory shared = sharedFiles[user].values();
+    function retreiveSharedFiles(address user)
+        public
+        view
+        returns (bytes[] memory)
+    {
+        bytes[] memory data;
+        uint256[] memory shared = sharedFiles[user].values();
 
         for (uint256 i = 0; i < shared.length; i++) {
             bytes memory file = fileToJson(files[shared[i]]);
@@ -141,20 +170,31 @@ contract AlphaShare {
         return data;
     }
 
-
-    function fileToJson(File storage file ) internal view returns(bytes memory){
-        bytes memory json =abi.encodePacked(
-               "{",
-               "Id:", file.Id,
-               ", Name:", file.Name,
-               ", Owner:", file.Owner,
-               ", ipfsHash:", file.ipfsHash,
-               ", FolderId:", file.FolderId,
-               ", Size:", file.Size,
-               ", Visibility:", file.Visibility,
-               ", Createdat:", file.CreatedAt,
-               "}"
-            );
+    function fileToJson(File storage file)
+        internal
+        view
+        returns (bytes memory)
+    {
+        bytes memory json = abi.encodePacked(
+            "{",
+            "Id:",
+            file.Id,
+            ", Name:",
+            file.Name,
+            ", Owner:",
+            file.Owner,
+            ", ipfsHash:",
+            file.ipfsHash,
+            ", FolderId:",
+            file.FolderId,
+            ", Size:",
+            file.Size,
+            ", Visibility:",
+            file.Visibility,
+            ", Createdat:",
+            file.CreatedAt,
+            "}"
+        );
         return json;
     }
 }
