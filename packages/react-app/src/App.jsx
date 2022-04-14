@@ -569,7 +569,7 @@ function App(props) {
               onDeleteFolder={handleDeleteFolder}
               onDeleteFile={handleDeleteFile}
             /> */}
-          <NestedEditableDemo />
+          <NestedEditableDemo contract={writeContracts.AlphaShare} tx={tx} />
           {/* </Table> */}
         </Route>
       </Switch>
