@@ -125,13 +125,13 @@ contract AlphaShare {
         return fileToJson(file);
     }
 
-    function retreiveOwnedFiles(address user)
+    function retreiveOwnedFiles()
         public
         view
         returns (bytes[] memory)
     {
         bytes[] memory data;
-        uint256[] memory owned = ownedFiles[user].values();
+        uint256[] memory owned = ownedFiles[msg.sender].values();
 
         for (uint256 i = 0; i < owned.length; i++) {
             bytes memory file = fileToJson(files[owned[i]]);
@@ -142,13 +142,13 @@ contract AlphaShare {
         return data;
     }
 
-    function retreiveFilesSharedWithMe(address user)
+    function retreiveFilesSharedWithMe()
         public
         view
         returns (bytes[] memory)
     {
         bytes[] memory data;
-        uint256[] memory shared = sharedWithMe[user].values();
+        uint256[] memory shared = sharedWithMe[msg.sender].values();
 
         for (uint256 i = 0; i < shared.length; i++) {
             bytes memory file = fileToJson(files[shared[i]]);
