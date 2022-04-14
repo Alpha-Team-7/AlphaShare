@@ -32,6 +32,7 @@ import deployedContracts from "./contracts/hardhat_contracts.json";
 import { Transactor, Web3ModalSetup } from "./helpers";
 import { useStaticJsonRPC } from "./hooks";
 import { NestedEditableFileBrowser } from "./NestedEditableFileBrowser";
+import SharedWithMe from "./components/SharedWithMe";
 
 const { ethers } = require("ethers");
 
