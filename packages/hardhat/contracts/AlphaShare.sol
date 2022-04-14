@@ -119,24 +119,22 @@ contract AlphaShare {
         public
         view
         hasAccess(fileId)
-        returns (bytes memory)
+        returns (string memory)
     {
-        File storage file = files[fileId];
-        return fileToJson(file);
+        return fileToJson(files[fileId]);
     }
 
     function retreiveOwnedFiles()
         public
         view
-        returns (bytes[] memory)
+        returns (string[] memory)
     {
-        bytes[] memory data;
         uint256[] memory owned = ownedFiles[msg.sender].values();
+        string[]  memory data = new string[](owned.length);
+
 
         for (uint256 i = 0; i < owned.length; i++) {
-            bytes memory file = fileToJson(files[owned[i]]);
-
-            data[i] = file;
+            data[i] = fileToJson(files[owned[i]]);
         }
 
         return data;
@@ -145,14 +143,13 @@ contract AlphaShare {
     function retreiveFilesSharedWithMe()
         public
         view
-        returns (bytes[] memory)
+        returns (string[] memory)
     {
-        bytes[] memory data;
         uint256[] memory shared = sharedWithMe[msg.sender].values();
+        string[]  memory data = new string[](shared.length);
 
         for (uint256 i = 0; i < shared.length; i++) {
-            bytes memory file = fileToJson(files[shared[i]]);
-            data[i] = file;
+            data[i] = fileToJson(files[shared[i]]);
         }
         return data;
     }
@@ -160,9 +157,9 @@ contract AlphaShare {
     function fileToJson(File storage file)
         internal
         view
-        returns (bytes memory)
+        returns (string memory)
     {
-        bytes memory json = abi.encodePacked(
+        return string(abi.encodePacked(
             "{",
             "key:",
             file.key,
@@ -174,10 +171,8 @@ contract AlphaShare {
             file.size,
             ", visibility:",
             file.visibility,
-            ", createdAt:",
+            ", modified:",
             file.createdAt,
-            "}"
-        );
-        return json;
+            "}"));
     }
 }
