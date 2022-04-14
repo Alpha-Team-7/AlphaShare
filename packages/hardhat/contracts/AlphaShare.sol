@@ -18,6 +18,8 @@ contract AlphaShare {
 
     mapping(address => EnumerableSet.UintSet) ownedFiles;
     mapping(address => EnumerableSet.UintSet) sharedWithMe;
+    mapping(address => EnumerableSet.UintSet) sharedByMe;
+
 
     struct File {
         string key;
