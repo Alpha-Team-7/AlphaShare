@@ -4,6 +4,16 @@ import Moment from "moment";
 import FileBrowser, { Icons } from "react-keyed-file-browser";
 
 export class NestedEditableDemo extends React.Component {
+  folders = [
+    {
+      Name: "documents",
+      Id: 5,
+    },
+    {
+      Name: "hi",
+      Id: 6,
+    }
+  ];
   state = {
     files: [
       {
@@ -13,6 +23,11 @@ export class NestedEditableDemo extends React.Component {
       },
       {
         key: "photos/animals/kitten_ball.png",
+        modified: +Moment().subtract(3, "days"),
+        size: 545 * 1024,
+      },
+      {
+        key: "photos/monkey/",
         modified: +Moment().subtract(3, "days"),
         size: 545 * 1024,
       },
@@ -44,7 +59,12 @@ export class NestedEditableDemo extends React.Component {
     ],
   };
 
-  handleCreateFolder = key => {
+  handleCreateFolder = async key => {
+
+    const folderInfo = this.getNewFolderInfo(key);
+
+    // Make smart contract call
+    await this.props.tx(this.props.contract.addFolder(folderInfo.parentFolderId, folderInfo.name));
     this.setState(state => {
       state.files = state.files.concat([
         {
@@ -144,6 +164,19 @@ export class NestedEditableDemo extends React.Component {
       state.files = newFiles;
       return state;
     });
+  };
+
+  getNewFolderInfo = path => {
+    const pathArr = path.split('/');
+    if(pathArr.length < 3){
+      return {parentFolderId: 0, name: pathArr[0]};
+    }
+    let name = pathArr[pathArr.length - 3];
+    for (let i = 0; i < this.folders.length; i++) {
+      if (this.folders[i].Name === name) {
+        return {parentFolderId: this.folders[i].Id, name};
+      }
+    }
   };
 
   render() {

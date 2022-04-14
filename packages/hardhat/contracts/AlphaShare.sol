@@ -14,12 +14,14 @@ contract AlphaShare {
     mapping(uint256 => File) files;
 
     uint256 fileCounter = 1;
+    uint256 folderCounter = 1;
 
     mapping(uint256 => Folder) folders;
     // mapping of file id to ipfs hash value
     // mapping (uint256 => string) private filsHashes;
 
     mapping(address => EnumerableSet.UintSet) ownedFiles;
+    mapping(address => EnumerableSet.UintSet) ownedFolders;
     mapping(address => EnumerableSet.UintSet) sharedFiles;
 
     struct Folder {
@@ -94,6 +96,18 @@ contract AlphaShare {
         fileCounter++;
     }
 
+    function addFolder(uint parentFolderId, string memory name) public {
+        Folder storage folder = folders[folderCounter];
+        folder.Name = name;
+        folder.Id = folderCounter;
+
+        ownedFolders[msg.sender].add(folderCounter);
+        folderCounter++;
+    }
+
+    documents - 7
+        hello - 6
+            hi - 4
     function stopShare(uint256 fileId, address[] calldata addresses)
         public
         fileOwner(fileId)
