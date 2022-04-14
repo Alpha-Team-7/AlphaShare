@@ -1,22 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Moment from "moment";
+import "font-awesome/css/font-awesome.min.css";
 
 import FileBrowser, { Icons } from "react-keyed-file-browser";
 import { Button } from "antd";
-const { ethers } = require("ethers");
-
 export const NestedEditableFileBrowser = ({ tx, contract }) => {
-  // const [loaded, setLoaded] = useState(false);
   const [files, setFiles] = useState([]);
-
-  // useEffect(() => {
-  //   const loadFiles = async () => {
-  //     const files = await tx(contract.retreiveOwnedFiles());
-  //     setFiles(files.map(file => JSON.parse(ethers.utils.parseBytes32String(file))));
-  //     setLoaded(true);
-  //   }
-  //   loadFiles();
-  // }, [loaded]);
 
   const handleCreateFolder = async key => {
     // Make smart contract call
@@ -142,11 +131,7 @@ export const NestedEditableFileBrowser = ({ tx, contract }) => {
 
   return (
     <>
-      <Button
-        type={"primary"}
-        // loading={true}
-        onClick={loadFiles}
-      >
+      <Button type={"primary"} onClick={loadFiles}>
         Load Files
       </Button>
       <FileBrowser
