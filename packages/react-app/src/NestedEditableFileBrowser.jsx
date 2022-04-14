@@ -20,16 +20,19 @@ export const NestedEditableFileBrowser = ({ tx, contract }) => {
 
   const handleCreateFolder = async key => {
     // Make smart contract call
-    await tx(contract.addFolder(key));
+    const createFolderTx = await tx(contract.addFolder(key));
+    await createFolderTx.wait();
 
-    // setFiles(_files => {
-    //   _files = _files.concat([
-    //     {
-    //       key: key,
-    //     },
-    //   ]);
-    //   return _files;
-    // });
+    alert("done");
+
+    setFiles(_files => {
+      _files = _files.concat([
+        {
+          key: key,
+        },
+      ]);
+      return _files;
+    });
   };
   const handleCreateFiles = (files, prefix) => {
     setFiles(_files => {
