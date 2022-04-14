@@ -1,65 +1,27 @@
 import React, { useState } from "react";
 import Moment from "moment";
+import "font-awesome/css/font-awesome.min.css";
 
 import FileBrowser, { Icons } from "react-keyed-file-browser";
-
+import { Button } from "antd";
 export const NestedEditableFileBrowser = ({ tx, contract }) => {
-  const [files, setFiles] = useState([
-    {
-      key: "photos/animals/cat in a hat.png",
-      modified: +Moment().subtract(1, "hours"),
-      size: 1.5 * 1024 * 1024,
-    },
-    {
-      key: "photos/animals/kitten_ball.png",
-      modified: +Moment().subtract(3, "days"),
-      size: 545 * 1024,
-    },
-    {
-      key: "photos/monkey/",
-      modified: +Moment().subtract(3, "days"),
-      size: 545 * 1024,
-    },
-    {
-      key: "photos/animals/elephants.png",
-      modified: +Moment().subtract(3, "days"),
-      size: 52 * 1024,
-    },
-    {
-      key: "photos/funny fall.gif",
-      modified: +Moment().subtract(2, "months"),
-      size: 13.2 * 1024 * 1024,
-    },
-    {
-      key: "photos/holiday.jpg",
-      modified: +Moment().subtract(25, "days"),
-      size: 85 * 1024,
-    },
-    {
-      key: "documents/letter chunks.doc",
-      modified: +Moment().subtract(15, "days"),
-      size: 480 * 1024,
-    },
-    {
-      key: "documents/export.pdf",
-      modified: +Moment().subtract(15, "days"),
-      size: 4.2 * 1024 * 1024,
-    },
-  ]);
+  const [files, setFiles] = useState([]);
 
   const handleCreateFolder = async key => {
-
     // Make smart contract call
-    await tx(contract.addFolder(key));
+    const createFolderTx = await tx(contract.addFolder(key));
+    await createFolderTx.wait();
 
-    // setFiles(_files => {
-    //   _files = _files.concat([
-    //     {
-    //       key: key,
-    //     },
-    //   ]);
-    //   return _files;
-    // });
+    alert("done");
+
+    setFiles(_files => {
+      _files = _files.concat([
+        {
+          key: key,
+        },
+      ]);
+      return _files;
+    });
   };
   const handleCreateFiles = (files, prefix) => {
     setFiles(_files => {
@@ -153,18 +115,37 @@ export const NestedEditableFileBrowser = ({ tx, contract }) => {
     });
   };
 
+  const loadFiles = async () => {
+    const files = await tx(contract.retreiveOwnedFiles());
+    setFiles(
+      files[0].map((key, index) => {
+        return {
+          key: key,
+          ipfsHash: files[1][index],
+          size: files[2][index],
+          modified: Moment(new Date(files[3][index])),
+        };
+      }),
+    );
+  }
+
   return (
-    <FileBrowser
-      files={files}
-      icons={Icons.FontAwesome(4)}
-      onCreateFolder={handleCreateFolder}
-      onCreateFiles={handleCreateFiles}
-      onMoveFolder={handleRenameFolder}
-      onMoveFile={handleRenameFile}
-      onRenameFolder={handleRenameFolder}
-      onRenameFile={handleRenameFile}
-      onDeleteFolder={handleDeleteFolder}
-      onDeleteFile={handleDeleteFile}
-    />
+    <>
+      <Button type={"primary"} onClick={loadFiles}>
+        Load Files
+      </Button>
+      <FileBrowser
+        files={files}
+        icons={Icons.FontAwesome(4)}
+        onCreateFolder={handleCreateFolder}
+        onCreateFiles={handleCreateFiles}
+        onMoveFolder={handleRenameFolder}
+        onMoveFile={handleRenameFile}
+        onRenameFolder={handleRenameFolder}
+        onRenameFile={handleRenameFile}
+        onDeleteFolder={handleDeleteFolder}
+        onDeleteFile={handleDeleteFile}
+      />
+    </>
   );
 };
