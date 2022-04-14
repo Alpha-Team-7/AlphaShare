@@ -92,7 +92,6 @@ contract AlphaShare {
         ownedFiles[msg.sender].add(fileCounter);
         fileCounter++;
     }
-
     function stopShare(uint256 fileId, address[] calldata addresses)
         public
         fileOwner(fileId)
@@ -101,6 +100,7 @@ contract AlphaShare {
             File storage file = files[fileId];
             file.sharedWith.remove(addresses[i]);
             sharedWithMe[addresses[i]].remove(fileId);
+            sharedByMe[addresses[i]].remove(fileId);
             emit StopFileShare(file.key, file.owner, addresses[i]);
         }
     }
@@ -135,6 +135,14 @@ contract AlphaShare {
         returns (string[] memory, string[] memory, uint[] memory, uint[] memory)
     {
         return retrieveFiles(sharedWithMe[msg.sender].values());
+    }
+
+    function retrieveFilesSharedByMe()
+        public
+        view
+        returns (string[] memory, string[] memory, uint[] memory, uint[] memory)
+    {
+        return retrieveFiles(sharedByMe[msg.sender].values());
     }
 
     function retrieveFiles(uint[] memory fileIds)

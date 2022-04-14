@@ -32,6 +32,7 @@ import deployedContracts from "./contracts/hardhat_contracts.json";
 import { Transactor, Web3ModalSetup } from "./helpers";
 import { useStaticJsonRPC } from "./hooks";
 import { NestedEditableFileBrowser } from "./NestedEditableFileBrowser";
+import SharedWithMe from "./components/SharedWithMe";
 
 const { ethers } = require("ethers");
 
@@ -243,6 +244,9 @@ function App(props) {
       <Switch>
         <Route path="/fileManager">
           <NestedEditableFileBrowser contract={writeContracts.AlphaShare} tx={tx} />
+        </Route>
+        <Route path="/SharedWithMe">
+          <SharedWithMe contract={readContracts.AlphaShare} tx={tx}/>
         </Route>
       </Switch>
 
