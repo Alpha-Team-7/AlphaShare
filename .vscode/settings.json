@@ -31,5 +31,9 @@
    "search.exclude": {
       "**/yarn-error.log": true,
       "**/yarn.lock": true
-   }
+   },
+   "cSpell.words": [
+      "filemanager",
+      "NETWORKCHECK"
+   ]
 }
