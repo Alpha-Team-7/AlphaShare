@@ -6,11 +6,7 @@ import React from "react";
 export default function Header({ title, subTitle }) {
   return (
     <a target="_blank" rel="noopener noreferrer">
-      <PageHeader
-        title={title}
-        subTitle={subTitle}
-        // style={{ cursor: "pointer", background: "linear-gradient(to left, #8942a8, #ba382f )", width: "100%" }}
-      />
+      <PageHeader title={title} subTitle={subTitle} style={{ cursor: "pointer" }} />
     </a>
   );
 }

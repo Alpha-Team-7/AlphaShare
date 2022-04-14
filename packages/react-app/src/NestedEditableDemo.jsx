@@ -12,7 +12,7 @@ export class NestedEditableDemo extends React.Component {
     {
       Name: "hi",
       Id: 6,
-    }
+    },
   ];
   state = {
     files: [
@@ -60,7 +60,6 @@ export class NestedEditableDemo extends React.Component {
   };
 
   handleCreateFolder = async key => {
-
     const folderInfo = this.getNewFolderInfo(key);
 
     // Make smart contract call
@@ -167,14 +166,14 @@ export class NestedEditableDemo extends React.Component {
   };
 
   getNewFolderInfo = path => {
-    const pathArr = path.split('/');
-    if(pathArr.length < 3){
-      return {parentFolderId: 0, name: pathArr[0]};
+    const pathArr = path.split("/");
+    if (pathArr.length < 3) {
+      return { parentFolderId: 0, name: pathArr[0] };
     }
     let name = pathArr[pathArr.length - 3];
     for (let i = 0; i < this.folders.length; i++) {
       if (this.folders[i].Name === name) {
-        return {parentFolderId: this.folders[i].Id, name};
+        return { parentFolderId: this.folders[i].Id, name };
       }
     }
   };
