@@ -68,8 +68,7 @@ contract AlphaShare {
         string calldata ipfsHash,
         uint256 size
     ) public {
-        File storage file = files[fileCounter]; 
-        
+        File storage file = files[fileCounter];
         file.key = key;
         file.ipfsHash = ipfsHash;
         file.owner = msg.sender;
@@ -85,8 +84,7 @@ contract AlphaShare {
     function addFolder(
         string calldata key
     ) public {
-        File storage file = files[fileCounter]; 
-        
+        File storage file = files[fileCounter];
         file.key = key;
         file.owner = msg.sender;
         file.visibility = true;
