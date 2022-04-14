@@ -14,37 +14,28 @@ contract AlphaShare {
     mapping(uint256 => File) files;
 
     uint256 fileCounter = 1;
-    uint256 folderCounter = 1;
 
-    mapping(uint256 => Folder) folders;
+    // mapping(uint256 => Folder) folders;
     // mapping of file id to ipfs hash value
     // mapping (uint256 => string) private filsHashes;
 
     mapping(address => EnumerableSet.UintSet) ownedFiles;
-    mapping(address => EnumerableSet.UintSet) ownedFolders;
-    mapping(address => EnumerableSet.UintSet) sharedFiles;
-
-    struct Folder {
-        string Name;
-        address owner;
-        uint256 Id;
-    }
+    mapping(address => EnumerableSet.UintSet) sharedWithMe;
 
     struct File {
-        uint256 Id;
-        string Name;
+        string key;
         string ipfsHash;
-        address Owner;
-        uint256 FolderId;
-        uint256 Size;
-        bool Visibility;
-        //EnumerableSet.AddressSet shared; // just to keep track of number with access
-        uint256 CreatedAt;
+        address owner;
+        uint256 size;
+        bool visibility;
+        EnumerableSet.AddressSet sharedWith;
+        bool isFolder;
+        uint256 createdAt;
     }
 
     modifier fileOwner(uint256 fileId) {
         require(
-            msg.sender == files[fileId].Owner,
+            msg.sender == files[fileId].owner,
             "You are not the file owner"
         );
         _;
@@ -52,9 +43,7 @@ contract AlphaShare {
 
     modifier hasAccess(uint256 fileId) {
         require(
-            msg.sender == files[fileId].Owner ||
-                sharedFiles[msg.sender].contains(fileId) ||
-                files[fileId].Visibility,
+            msg.sender == files[fileId].owner || files[fileId].visibility || files[fileId].sharedWith.contains(msg.sender),
             "You dont have access to this file"
         );
         _;
@@ -69,63 +58,61 @@ contract AlphaShare {
     {
         for (uint256 i = 0; i < addresses.length; i++) {
             File storage file = files[fileId];
-            //file.shared.add(addresses[i]);
-            sharedFiles[msg.sender].add(fileId);
-            emit StartFileShare(file.Name, file.Owner, addresses[i]);
+            file.sharedWith.add(addresses[i]);
+            emit StartFileShare(file.key, file.owner, addresses[i]);
         }
     }
 
     function addFile(
-        string calldata name,
+        string calldata key,
         string calldata ipfsHash,
-        uint256 size,
-        uint256 folderId
+        uint256 size
     ) public {
-        File memory file = File({
-            Name: name,
-            Id: fileCounter,
-            ipfsHash: ipfsHash,
-            Owner: msg.sender,
-            FolderId: folderId,
-            Size: size,
-            Visibility: true,
-            CreatedAt: block.timestamp
-        });
+        File storage file = files[fileCounter]; 
+        
+        file.key = key;
+        file.ipfsHash = ipfsHash;
+        file.owner = msg.sender;
+        file.size = size;
+        file.visibility = true;
+        file.createdAt = block.timestamp;
+        file.isFolder = false;
 
-        files[fileCounter] = file;
+        ownedFiles[msg.sender].add(fileCounter);
         fileCounter++;
     }
 
-    function addFolder(uint parentFolderId, string memory name) public {
-        Folder storage folder = folders[folderCounter];
-        folder.Name = name;
-        folder.Id = folderCounter;
+    function addFolder(
+        string calldata key
+    ) public {
+        File storage file = files[fileCounter]; 
+        
+        file.key = key;
+        file.owner = msg.sender;
+        file.visibility = true;
+        file.isFolder = true;
 
-        ownedFolders[msg.sender].add(folderCounter);
-        folderCounter++;
+        ownedFiles[msg.sender].add(fileCounter);
+        fileCounter++;
     }
 
-    documents - 7
-        hello - 6
-            hi - 4
     function stopShare(uint256 fileId, address[] calldata addresses)
         public
         fileOwner(fileId)
     {
         for (uint256 i = 0; i < addresses.length; i++) {
             File storage file = files[fileId];
-            //file.shared.remove(addresses[i]);
-
-            sharedFiles[msg.sender].remove(fileId);
-            emit StopFileShare(file.Name, file.Owner, addresses[i]);
+            file.sharedWith.remove(addresses[i]);
+            sharedWithMe[addresses[i]].remove(fileId);
+            emit StopFileShare(file.key, file.owner, addresses[i]);
         }
     }
 
-    function updateFileAccess(uint256 fileId, bool visible)
+    function updateFileAccess(uint256 fileId, bool visibility)
         public
         fileOwner(fileId)
     {
-        files[fileId].Visibility = visible;
+        files[fileId].visibility = visibility;
     }
 
     function retreiveFile(uint256 fileId)
@@ -155,13 +142,13 @@ contract AlphaShare {
         return data;
     }
 
-    function retreiveSharedFiles(address user)
+    function retreiveFilesSharedWithMe(address user)
         public
         view
         returns (bytes[] memory)
     {
         bytes[] memory data;
-        uint256[] memory shared = sharedFiles[user].values();
+        uint256[] memory shared = sharedWithMe[user].values();
 
         for (uint256 i = 0; i < shared.length; i++) {
             bytes memory file = fileToJson(files[shared[i]]);
@@ -177,22 +164,18 @@ contract AlphaShare {
     {
         bytes memory json = abi.encodePacked(
             "{",
-            "Id:",
-            file.Id,
-            ", Name:",
-            file.Name,
-            ", Owner:",
-            file.Owner,
+            "key:",
+            file.key,
+            ", owner:",
+            file.owner,
             ", ipfsHash:",
             file.ipfsHash,
-            ", FolderId:",
-            file.FolderId,
-            ", Size:",
-            file.Size,
-            ", Visibility:",
-            file.Visibility,
-            ", Createdat:",
-            file.CreatedAt,
+            ", size:",
+            file.size,
+            ", visibility:",
+            file.visibility,
+            ", createdAt:",
+            file.createdAt,
             "}"
         );
         return json;
