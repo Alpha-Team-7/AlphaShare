@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "hardhat/console.sol";
 
 ///@title A File sharing and storage PoC for a Decentralized Library
 ///@author AlphaShare Team
@@ -15,12 +16,10 @@ contract AlphaShare {
 
     uint256 fileCounter = 1;
 
-    // mapping(uint256 => Folder) folders;
-    // mapping of file id to ipfs hash value
-    // mapping (uint256 => string) private filsHashes;
-
     mapping(address => EnumerableSet.UintSet) ownedFiles;
     mapping(address => EnumerableSet.UintSet) sharedWithMe;
+    mapping(address => EnumerableSet.UintSet) sharedByMe;
+
 
     struct File {
         string key;
@@ -113,64 +112,50 @@ contract AlphaShare {
         files[fileId].visibility = visibility;
     }
 
-    function retreiveFile(uint256 fileId)
-        public
-        view
-        hasAccess(fileId)
-        returns (string memory)
-    {
-        return fileToJson(files[fileId]);
-    }
+    // function retreiveFile(uint256 fileId)
+    //     public
+    //     view
+    //     hasAccess(fileId)
+    //     returns (string memory)
+    // {
+    //     return fileToJson(files[fileId]);
+    // }
 
     function retreiveOwnedFiles()
         public
         view
-        returns (string[] memory)
+        returns (string[] memory, string[] memory, uint[] memory, uint[] memory)
     {
-        uint256[] memory owned = ownedFiles[msg.sender].values();
-        string[]  memory data = new string[](owned.length);
-
-
-        for (uint256 i = 0; i < owned.length; i++) {
-            data[i] = fileToJson(files[owned[i]]);
-        }
-
-        return data;
+        return retrieveFiles(ownedFiles[msg.sender].values());
     }
 
     function retreiveFilesSharedWithMe()
         public
         view
-        returns (string[] memory)
+        returns (string[] memory, string[] memory, uint[] memory, uint[] memory)
     {
-        uint256[] memory shared = sharedWithMe[msg.sender].values();
-        string[]  memory data = new string[](shared.length);
-
-        for (uint256 i = 0; i < shared.length; i++) {
-            data[i] = fileToJson(files[shared[i]]);
-        }
-        return data;
+        return retrieveFiles(sharedWithMe[msg.sender].values());
     }
 
-    function fileToJson(File storage file)
+    function retrieveFiles(uint[] memory fileIds)
         internal
         view
-        returns (string memory)
+        returns (string[] memory, string[] memory, uint[] memory, uint[] memory)
     {
-        return string(abi.encodePacked(
-            "{",
-            "key:",
-            file.key,
-            ", owner:",
-            file.owner,
-            ", ipfsHash:",
-            file.ipfsHash,
-            ", size:",
-            file.size,
-            ", visibility:",
-            file.visibility,
-            ", modified:",
-            file.createdAt,
-            "}"));
+        string[]  memory key = new string[](fileIds.length);
+        string[]  memory ipfsHash = new string[](fileIds.length);
+        uint[]  memory size = new uint[](fileIds.length);
+        uint[]  memory createdAt = new uint[](fileIds.length);
+
+        for (uint256 i = 0; i < fileIds.length; i++) {
+            File storage file = files[fileIds[i]];
+            key[i] = file.key;
+            ipfsHash[i] = file.ipfsHash;
+            size[i] = file.size;
+            createdAt[i] = file.createdAt;
+
+        }
+
+        return (key, ipfsHash, size, createdAt);
     }
 }
