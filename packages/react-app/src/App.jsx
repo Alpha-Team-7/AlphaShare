@@ -244,6 +244,9 @@ function App(props) {
         <Route path="/fileManager">
           <NestedEditableFileBrowser contract={writeContracts.AlphaShare} tx={tx} />
         </Route>
+        <Route path="/SharedWithMe">
+          <SharedWithMe contract={readContracts.AlphaShare} tx={tx}/>
+        </Route>
       </Switch>
 
       <ThemeSwitch />
