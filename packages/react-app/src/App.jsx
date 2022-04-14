@@ -1,4 +1,4 @@
-import { Button, Col, Menu, Row, Table } from "antd";
+import { Button, Col, Menu, Row } from "antd";
 import "antd/dist/antd.css";
 import {
   useBalance,
@@ -30,9 +30,8 @@ import externalContracts from "./contracts/external_contracts";
 // contracts
 import deployedContracts from "./contracts/hardhat_contracts.json";
 import { Transactor, Web3ModalSetup } from "./helpers";
-import { ExampleUI } from "./views";
 import { useStaticJsonRPC } from "./hooks";
-import { NestedEditableDemo } from "./NestedEditableDemo";
+import { NestedEditableFileBrowser } from "./NestedEditableFileBrowser";
 
 import Moment from "moment";
 
@@ -40,24 +39,6 @@ import FileBrowser, { Icons } from "react-keyed-file-browser";
 import "font-awesome/css/font-awesome.min.css";
 
 const { ethers } = require("ethers");
-/*
-    Welcome to 🏗 scaffold-eth !
-
-    Code:
-    https://github.com/scaffold-eth/scaffold-eth
-
-    Support:
-    https://t.me/joinchat/KByvmRe5wkR-8F_zz6AjpA
-    or DM @austingriffith on twitter or telegram
-
-    You should get your own Alchemy.com & Infura.io ID and put it in `constants.js`
-    (this is your connection to the main Ethereum network for ENS etc.)
-
-
-    🌏 EXTERNAL CONTRACTS:
-    You can also bring in contract artifacts in `constants.js`
-    (and then use the `useExternalContractLoader()` hook!)
-*/
 
 /// 📡 What chain are your contracts deployed to?
 const initialNetwork = NETWORKS.localhost; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
@@ -176,14 +157,8 @@ function App(props) {
   // keep track of a variable from the contract in the local React state:
   const purpose = useContractReader(readContracts, "YourContract", "purpose");
 
-  /*
-  const addressFromENS = useResolveName(mainnetProvider, "austingriffith.eth");
-  console.log("🏷 Resolved austingriffith.eth as:",addressFromENS)
-  */
 
-  //
   // 🧫 DEBUG 👨🏻‍🔬
-  //
   useEffect(() => {
     if (
       DEBUG &&
@@ -252,115 +227,6 @@ function App(props) {
   const faucetAvailable = localProvider && localProvider.connection && targetNetwork.name.indexOf("local") !== -1;
 
   /******************START  OF FILE MANAGER COMPONENT ********************************** */
-
-  // const columns = [
-  //   {
-  //     title: "File",
-  //     dataIndex: "key",
-  //     key: "key",
-  //   },
-
-  //   {
-  //     title: "Size",
-  //     dataIndex: "size",
-  //     key: "key",
-  //   },
-
-  //   {
-  //     title: "Last Modified",
-  //     dataIndex: "modified",
-  //     key: "key",
-  //   },
-  // ];
-
-  // const columns = [
-  //   {
-  //     title: "File",
-  //     dataIndex: "file",
-  //     filters: [
-  //       {
-  //         text: "Joe",
-  //         value: "Joe",
-  //       },
-  //       {
-  //         text: "Jim",
-  //         value: "Jim",
-  //       },
-  //       {
-  //         text: "Submenu",
-  //         value: "Submenu",
-  //         children: [
-  //           {
-  //             text: "Green",
-  //             value: "Green",
-  //           },
-  //           {
-  //             text: "Black",
-  //             value: "Black",
-  //           },
-  //         ],
-  //       },
-  //     ],
-  //     // specify the condition of filtering result
-  //     // here is that finding the name started with `value`
-  //     onFilter: (value, record) => record.name.indexOf(value) === 0,
-  //     sorter: (a, b) => a.name.length - b.name.length,
-  //     sortDirections: ["descend"],
-  //   },
-  //   {
-  //     title: "Size",
-  //     dataIndex: "size",
-  //     defaultSortOrder: "descend",
-  //     sorter: (a, b) => a.age - b.age,
-  //   },
-  //   {
-  //     title: "Last Modified",
-  //     dataIndex: "last modified",
-  //     filters: [
-  //       {
-  //         text: "London",
-  //         value: "London",
-  //       },
-  //       {
-  //         text: "New York",
-  //         value: "New York",
-  //       },
-  //     ],
-  //     onFilter: (value, record) => record.address.indexOf(value) === 0,
-  //   },
-  // ];
-
-  // const data = [
-  //   {
-  //     key: "1",
-  //     name: "John Brown",
-  //     age: 32,
-  //     address: "New York No. 1 Lake Park",
-  //   },
-  //   {
-  //     key: "2",
-  //     name: "Jim Green",
-  //     age: 42,
-  //     address: "London No. 1 Lake Park",
-  //   },
-  //   {
-  //     key: "3",
-  //     name: "Joe Black",
-  //     age: 32,
-  //     address: "Sidney No. 1 Lake Park",
-  //   },
-  //   {
-  //     key: "4",
-  //     name: "Jim Red",
-  //     age: 32,
-  //     address: "London No. 2 Lake Park",
-  //   },
-  // ];
-
-  // function onChange(filters, sorter, extra) {
-  //   console.log("params", filters, sorter, extra);
-  // }
-
   const [state, setState] = useState({
     files: [
       {
@@ -522,9 +388,6 @@ function App(props) {
         USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
       />
       <Menu style={{ textAlign: "center", marginTop: 40 }} selectedKeys={[location.pathname]} mode="horizontal">
-        {/* <Menu.Item key="/exampleui">
-          <Link to="/exampleui">ExampleUI</Link>
-        </Menu.Item> */}
         <Menu.Item key="/filemanager">
           <Link to="/fileManager">FileManager</Link>
         </Menu.Item>
@@ -532,45 +395,8 @@ function App(props) {
       <TopNavbar />
 
       <Switch>
-        {/* <Route path="/exampleui">
-          <ExampleUI
-            address={address}
-            userSigner={userSigner}
-            mainnetProvider={mainnetProvider}
-            localProvider={localProvider}
-            yourLocalBalance={yourLocalBalance}
-            price={price}
-            tx={tx}
-            writeContracts={writeContracts}
-            readContracts={readContracts}
-            purpose={purpose}
-          />
-        </Route> */}
         <Route path="/fileManager">
-          {/* <Table
-            columns={columns} dataSource={data} onChange={onChange}
-            style={{
-              width: "70%",
-              textAlign: "center",
-              marginTop: 40,
-              marginLeft: "15%",
-              marginRight: "15%",
-            }}
-          > */}
-          {/* <FileBrowser className="file"
-              files={state.files}
-              icons={Icons.FontAwesome(4)}
-              onCreateFolder={handleCreateFolder}
-              onCreateFiles={handleCreateFiles}
-              onMoveFolder={handleRenameFolder}
-              onMoveFile={handleRenameFile}
-              onRenameFolder={handleRenameFolder}
-              onRenameFile={handleRenameFile}
-              onDeleteFolder={handleDeleteFolder}
-              onDeleteFile={handleDeleteFile}
-            /> */}
-          <NestedEditableDemo contract={writeContracts.AlphaShare} tx={tx} />
-          {/* </Table> */}
+          <NestedEditableFileBrowser contract={writeContracts.AlphaShare} tx={tx} />
         </Route>
       </Switch>
 
