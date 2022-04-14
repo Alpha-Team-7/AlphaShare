@@ -104,10 +104,7 @@ contract AlphaShare {
         ownedFolders[msg.sender].add(folderCounter);
         folderCounter++;
     }
-
-    documents - 7
-        hello - 6
-            hi - 4
+    
     function stopShare(uint256 fileId, address[] calldata addresses)
         public
         fileOwner(fileId)
