@@ -17,7 +17,7 @@ contract AlphaShare {
     mapping(address => EnumerableSet.UintSet) sharedWithMe;
     mapping(address => EnumerableSet.UintSet) sharedByMe;
     EnumerableSet.UintSet publicFiles;
-    uint256 fileCounter = 1;
+    uint256 public fileCounter = 1;
 
     struct File {
         uint id;
