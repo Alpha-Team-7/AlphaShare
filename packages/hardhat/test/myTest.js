@@ -19,23 +19,27 @@ describe("IPFS", function () {
       alphaShare = await AlphaShare.deploy();
     });
 
-    describe("setPurpose()", function () {
-      it("Should be able to set a new purpose", async function () {
-        const newPurpose = "Test Purpose";
+    describe("addFile() and retrieveFile()", function () {
+      it("Add file", async function () {
+        await alphaShare.addFiles(["New file"], ["hjklhklijllkjsf"], [34], [true]);
+        expect(await alphaShare.fileCounter()).to.equal(2);
+     });
 
-        await alphaShare.setPurpose(newPurpose);
-        expect(await alphaShare.purpose()).to.equal(newPurpose);
-      });
+     it("retrieve  file", async function () {
+        const file = await alphaShare.retrievePublicFiles()
+        
+        expect(file[1].toString()).to.equal("New file");
+        expect(file[2].toString()).to.equal("hjklhklijllkjsf");
+     });
 
-      it("Should emit a SetPurpose event ", async function () {
-        const [owner] = await ethers.getSigners();
+     it("set visibility of file", async function () {
+        await alphaShare.updateFilesAccess([1], false);
 
-        const newPurpose = "Another Test Purpose";
+        const file = await alphaShare.retreiveOwnedFiles()
 
-        expect(await alphaShare.setPurpose(newPurpose))
-          .to.emit(alphaShare, "SetPurpose")
-          .withArgs(owner.address, newPurpose);
-      });
+        expect(file[5][0]).to.equal(false);
+     });     
+
     });
   });
 });
