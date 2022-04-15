@@ -39,19 +39,17 @@ describe("IPFS", function () {
 
         expect(file[5][0]).to.equal(false);
      });
-
-
-     
-
-      // it("Should emit a SetPurpose event ", async function () {
-      //   const [owner] = await ethers.getSigners();
-
-      //   const newPurpose = "Another Test Purpose";
-
-      //   expect(await alphaShare.setPurpose(newPurpose))
-      //     .to.emit(alphaShare, "SetPurpose")
-      //     .withArgs(owner.address, newPurpose);
-      // });
     });
+    describe("Access to file", function () {
+      it("should not share if you are not the file owner", async function () {
+        await alphaShare.connect(owner).addFiles(["New file"], ["hjklhklijllkjsf"], [34], [true])
+       await expect(alphaShare.connect(addr1).startFileShares([1], ["0x6BB12976bdaE76f22D6FFFBD5D1c0125dD566936"])).to.be.revertedWith("You are not the file owner")
+      })
+      it("should not stop share if you are not the file owner", async function () {
+        await alphaShare.connect(owner).addFiles(["New file"], ["hjklhklijllkjsf"], [34], [true])
+       await expect(alphaShare.connect(addr1).stopShare(1, ["0x6BB12976bdaE76f22D6FFFBD5D1c0125dD566936"])).to.be.revertedWith("You are not the file owner")
+      })
+
+    })
   });
 });
