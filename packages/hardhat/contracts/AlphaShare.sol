@@ -156,12 +156,7 @@ contract AlphaShare {
         uint256 size,
         bool visibility
     ) internal {
-<<<<<<< HEAD
         File storage file = files[fileCounter];
-=======
-        File storage file = files[fileCounter]; 
->>>>>>> 01e46dacad130137bf4c056dc952b2ea9b05e43b
-        
         file.id = fileCounter;
         file.key = key;
         file.ipfsHash = ipfsHash;

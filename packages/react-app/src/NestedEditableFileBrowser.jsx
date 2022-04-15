@@ -236,15 +236,7 @@ export const NestedEditableFileBrowser = ({ tx, contract }) => {
         Load Files
       </Button>{" "}
       &nbsp;
-<<<<<<< HEAD
-<<<<<<< HEAD
-      <Button type={"primary"} onClick={() => setIsModalVisible(true)}>
-=======
       <Button type={"primary"} style={{ marginTop: 10, marginBottom: 10 }} onClick={() => setIsModalVisible(true)}>
->>>>>>> 2bf4b6fb1cb9c033b53f5feb81620e35cc9b9c60
-=======
-      <Button type={"primary"} style={{ marginTop: 10, marginBottom: 10 }} onClick={() => setIsModalVisible(true)}>
->>>>>>> 01e46dacad130137bf4c056dc952b2ea9b05e43b
         Addresses for share/unshare
       </Button>
       <Popconfirm
