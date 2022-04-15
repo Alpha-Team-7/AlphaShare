@@ -33,6 +33,7 @@ import { Transactor, Web3ModalSetup } from "./helpers";
 import { useStaticJsonRPC } from "./hooks";
 import { NestedEditableFileBrowser } from "./NestedEditableFileBrowser";
 import SharedWithMe from "./components/SharedWithMe";
+import PublicFiles from "./components/PublicFiles";
 
 const { ethers } = require("ethers");
 
@@ -236,7 +237,13 @@ function App(props) {
       />
       <Menu style={{ textAlign: "center", marginTop: 40 }} selectedKeys={[location.pathname]} mode="horizontal">
         <Menu.Item key="/filemanager">
-          <Link to="/fileManager">FileManager</Link>
+          <Link to="/fileManager">File Manager</Link>
+        </Menu.Item>
+        <Menu.Item key="/sharedWithMe">
+          <Link to="/sharedWithMe">Shared With Me</Link>
+        </Menu.Item>
+        <Menu.Item key="/publicFiles">
+          <Link to="/publicFiles">Public Files</Link>
         </Menu.Item>
       </Menu>
       <TopNavbar />
@@ -245,8 +252,11 @@ function App(props) {
         <Route path="/fileManager">
           <NestedEditableFileBrowser contract={writeContracts.AlphaShare} tx={tx} />
         </Route>
-        <Route path="/SharedWithMe">
-          <SharedWithMe contract={readContracts.AlphaShare} tx={tx}/>
+        <Route path="/sharedWithMe">
+          <SharedWithMe contract={writeContracts.AlphaShare} tx={tx}/>
+        </Route>
+        <Route path="/publicFiles">
+          <PublicFiles contract={readContracts.AlphaShare} tx={tx}/>
         </Route>
       </Switch>
 

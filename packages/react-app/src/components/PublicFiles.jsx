@@ -5,11 +5,11 @@ import "font-awesome/css/font-awesome.min.css";
 import FileBrowser, { Icons } from "react-keyed-file-browser";
 import { Button } from "antd";
 
-const SharedWithMe = ({ tx, contract }) => {
+const PublicFiles = ({ tx, contract }) => {
   const [files, setFiles] = useState([]);
 
   const loadFiles = async () => {
-    const files = await tx(contract.retreiveFilesSharedWithMe());
+    const files = await tx(contract.retrievePublicFiles());
     console.log("Files loaded ==> ", files);
 
     setFiles(
@@ -37,4 +37,4 @@ const SharedWithMe = ({ tx, contract }) => {
   );
 };
 
-export default SharedWithMe;
+export default PublicFiles;
