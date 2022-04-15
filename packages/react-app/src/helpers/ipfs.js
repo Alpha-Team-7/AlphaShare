@@ -19,3 +19,14 @@ export async function getFromIPFS(hashToGet) {
     return content;
   }
 }
+
+// const uploadMany = async files => {
+//   try {
+//     const result = await Promise.all(ipfs.addAll(files));
+//     return result.map((file, index) => {
+//       return { hash: file.path, size: file.size, name: files[index].name };
+//     });
+//   } catch (e) {
+//     return [];
+//   }
+// };

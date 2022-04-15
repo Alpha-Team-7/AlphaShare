@@ -29,26 +29,6 @@ const pushDirectoryToIPFS = async path => {
   }
 };
 
-const uploadOne = async file => {
-  try {
-    const result = await ipfs.add(file);
-    return { hash: result.path, size: result.size, name: file.name };
-  } catch (e) {
-    return {};
-  }
-};
-
-const uploadMany = async files => {
-  try {
-    const result = await Promise.all(ipfs.addAll(files));
-    return result.map((file, index) => {
-      return { hash: file.path, size: file.size, name: files[index].name };
-    });
-  } catch (e) {
-    return [];
-  }
-};
-
 const publishHashToIPNS = async ipfsHash => {
   try {
     const response = await ipfs.name.publish(`/ipfs/${ipfsHash}`);

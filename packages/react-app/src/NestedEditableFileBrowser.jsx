@@ -5,13 +5,15 @@ import "font-awesome/css/font-awesome.min.css";
 import FileBrowser, { Icons } from "react-keyed-file-browser";
 import { Button, Popconfirm, Modal, Form, Input } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { addToIPFS } from "./helpers/ipfs";
 
 const { ethers } = require("ethers");
 
 export const NestedEditableFileBrowser = ({ tx, contract }) => {
   const [uploadVisibility, setUploadVisibility] = useState(true);
-  const [showPopupForToggleVisibilityForMany, setShowPopupForToggleVisibilityForMany] = useState(false);
-  const [visibilityForMany, setVisibilityForMany] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [showPopupForToggleVisibility, setShowPopupForToggleVisibility] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [shareOrUnshareAddresses, setShareOrUnshareAddresses] = useState([]);
   const [unSharing, setUnsharing] = useState(false);
@@ -38,6 +40,7 @@ export const NestedEditableFileBrowser = ({ tx, contract }) => {
   const [files, setFiles] = useState([]);
 
   const handleCreateFolder = async key => {
+    alert("came here to create folder");
     // Make smart contract call
     const createFolderTx = await tx(contract.addFolder(key));
     await createFolderTx.wait();
@@ -55,49 +58,55 @@ export const NestedEditableFileBrowser = ({ tx, contract }) => {
       return _files;
     });
   };
+
+  // Currently handles one file but can be extended to handle multiple
   const handleCreateFiles = async (_files, prefix) => {
-    // const newFiles = _files.map(file => {
-    //   let newKey = prefix;
-    //   if (prefix !== "" && prefix.substring(prefix.length - 1, prefix.length) !== "/") {
-    //     newKey += "/";
-    //   }
-    //   newKey += file.name;
-    //   return {
-    //     key: newKey,
-    //     size: file.size,
-    //     modified: +Moment(),
-    //   };
-    // });
+    if (_files.length > 1) {
+      alert("we handle only single files for now ");
+      return;
+    }
+    let newKey = prefix;
+    if (prefix !== "" && prefix.substring(prefix.length - 1, prefix.length) !== "/") {
+      newKey += "/";
+    }
+    newKey += _files[0].name;
 
-    // upload Files to IPFS
-    const newFiles = [
+    // Check if key is unique
+    let exists = false;
+    files.map(existingFile => {
+      if (existingFile.key === newKey) {
+        exists = true;
+      }
+      return null;
+    });
+    if (exists) {
+      alert("File Exists");
+      return;
+    }
+
+    const uploadedFile = await addToIPFS(_files[0]);
+
+    setUploadedFiles([
       {
-        key: "New/animals/hello in a hat.png",
-        modified: +Moment().subtract(1, "hours"),
-        size: 1.5 * 1024 * 1024,
-        ipfsHash: "ajlaksjglkjklgsa",
+        key: newKey,
+        size: _files[0].size,
+        ipfsHash: uploadedFile.path,
       },
-    ];
+    ]);
 
-    alert("done");
+    setUploading(true);
+    setShowPopupForToggleVisibility(true);
+  };
 
+  const continueCreateFiles = async () => {
     const uniqueNewFilesKeys = [];
     const uniqueNewFilesIpfsHashes = [];
     const uniqueNewFilesSizes = [];
 
-    newFiles.map(newFile => {
-      let exists = false;
-      files.map(existingFile => {
-        if (existingFile.key === newFile.key) {
-          exists = true;
-        }
-        return null;
-      });
-      if (!exists) {
-        uniqueNewFilesKeys.push(newFile.key);
-        uniqueNewFilesIpfsHashes.push(newFile.ipfsHash);
-        uniqueNewFilesSizes.push(newFile.size);
-      }
+    uploadedFiles.map(newFile => {
+      uniqueNewFilesKeys.push(newFile.key);
+      uniqueNewFilesIpfsHashes.push(newFile.ipfsHash);
+      uniqueNewFilesSizes.push(newFile.size);
       return null;
     });
 
@@ -111,7 +120,11 @@ export const NestedEditableFileBrowser = ({ tx, contract }) => {
     //   prev = prev.concat(uniqueNewFiles);
     //   return prev;
     // });
+
+    setUploading(false);
+    setUploadedFiles([]);
   };
+
   const handleShareFile = async fileKey => {
     if (shareOrUnshareAddresses.length < 1) {
       alert("No Addresses to share to");
@@ -155,7 +168,7 @@ export const NestedEditableFileBrowser = ({ tx, contract }) => {
     setShareOrUnshareAddresses([]);
     setUnsharing(false);
     setkeyOfFileToUnshare("");
-  }
+  };
 
   const getFileByKey = key => {
     console.log("key==> ", key);
@@ -177,8 +190,8 @@ export const NestedEditableFileBrowser = ({ tx, contract }) => {
       fileIds.push(file.id);
       visibility = !file.visibility;
     } else {
-      setShowPopupForToggleVisibilityForMany(true);
-      visibility = visibilityForMany;
+      alert("We handle only single files for now");
+      return;
     }
     // Make smart contract call
     const createFolderTx = await tx(contract.updateFilesAccess(fileIds, visibility));
@@ -225,7 +238,7 @@ export const NestedEditableFileBrowser = ({ tx, contract }) => {
     setShareOrUnshareAddresses(addresses);
     setIsModalVisible(false);
 
-    if(unSharing){
+    if (unSharing) {
       continueUnsharing();
     }
   };
@@ -240,15 +253,21 @@ export const NestedEditableFileBrowser = ({ tx, contract }) => {
         Addresses for share/unshare
       </Button>
       <Popconfirm
-        title="Choose Visibility for All"
-        visible={showPopupForToggleVisibilityForMany}
-        onConfirm={() => {
-          setVisibilityForMany(true);
-          setShowPopupForToggleVisibilityForMany(false);
+        title="Choose Visibility for upload"
+        visible={showPopupForToggleVisibility}
+        onConfirm={async () => {
+          setUploadVisibility(true);
+          setShowPopupForToggleVisibility(false);
+          if (uploading) {
+            await continueCreateFiles();
+          }
         }}
-        onCancel={() => {
-          setVisibilityForMany(false);
-          setShowPopupForToggleVisibilityForMany(false);
+        onCancel={async () => {
+          setUploadVisibility(false);
+          setShowPopupForToggleVisibility(false);
+          if (uploading) {
+            await continueCreateFiles();
+          }
         }}
         okText="Public"
         cancelText="Private"
