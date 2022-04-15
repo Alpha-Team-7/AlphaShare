@@ -13,15 +13,14 @@ contract AlphaShare {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     mapping(uint256 => File) files;
-
-    uint256 fileCounter = 1;
-
     mapping(address => EnumerableSet.UintSet) ownedFiles;
     mapping(address => EnumerableSet.UintSet) sharedWithMe;
     mapping(address => EnumerableSet.UintSet) sharedByMe;
-
+    EnumerableSet.UintSet publicFiles;
+    uint256 fileCounter = 1;
 
     struct File {
+        uint id;
         string key;
         string ipfsHash;
         address owner;
@@ -32,6 +31,7 @@ contract AlphaShare {
         uint256 createdAt;
     }
 
+    /** MODIFIERS */
     modifier fileOwner(uint256 fileId) {
         require(
             msg.sender == files[fileId].owner,
@@ -48,37 +48,21 @@ contract AlphaShare {
         _;
     }
 
-    event StartFileShare(string fileName, address owner, address sharee);
-    event StopFileShare(string fileName, address owner, address sharee);
+    /** EVENTS */
+    event AddFile(uint id, string key, string ipfsHash, uint size, uint createdAt, bool visibility, address owner);
+    event StartFileShare(uint id, address owner, address sharee);
+    event StopFileShare(uint id, address owner, address sharee);
+    event UpdateVisibility(uint id, bool visibility);
 
-    function startFileShare(uint256 fileId, address[] memory addresses)
-        public
-        fileOwner(fileId)
-    {
-        for (uint256 i = 0; i < addresses.length; i++) {
-            File storage file = files[fileId];
-            file.sharedWith.add(addresses[i]);
-            emit StartFileShare(file.key, file.owner, addresses[i]);
-        }
-    }
-
-    function addFile(
-        string calldata key,
-        string calldata ipfsHash,
-        uint256 size
+    function addFiles(
+        string[] calldata key,
+        string[] calldata ipfsHash,
+        uint256[] calldata size,
+        bool visibility
     ) public {
-        File storage file = files[fileCounter]; 
-        
-        file.key = key;
-        file.ipfsHash = ipfsHash;
-        file.owner = msg.sender;
-        file.size = size;
-        file.visibility = true;
-        file.createdAt = block.timestamp;
-        file.isFolder = false;
-
-        ownedFiles[msg.sender].add(fileCounter);
-        fileCounter++;
+        for(uint i = 0; i < key.length; i++){
+            addFile(key[i], ipfsHash[i], size[i], visibility);
+        }
     }
 
     function addFolder(
@@ -94,6 +78,15 @@ contract AlphaShare {
         ownedFiles[msg.sender].add(fileCounter);
         fileCounter++;
     }
+
+    function startFileShares(uint256[] calldata fileIds, address[] memory addresses)
+        public
+    {
+        for (uint256 i = 0; i < fileIds.length; i++) {
+            startFileShare(fileIds[i], addresses);
+        }
+    }
+
     function stopShare(uint256 fileId, address[] calldata addresses)
         public
         fileOwner(fileId)
@@ -102,31 +95,23 @@ contract AlphaShare {
             File storage file = files[fileId];
             file.sharedWith.remove(addresses[i]);
             sharedWithMe[addresses[i]].remove(fileId);
-            sharedByMe[addresses[i]].remove(fileId);
-            emit StopFileShare(file.key, file.owner, addresses[i]);
+            sharedByMe[msg.sender].remove(fileId);
+            emit StopFileShare(file.id, file.owner, addresses[i]);
         }
     }
 
-    function updateFileAccess(uint256 fileId, bool visibility)
+    function updateFilesAccess(uint256[] calldata fileIds, bool visibility)
         public
-        fileOwner(fileId)
     {
-        files[fileId].visibility = visibility;
+        for (uint256 i = 0; i < fileIds.length; i++) {
+            updateFilesAccess(fileIds[i], visibility);
+        }
     }
-
-    // function retreiveFile(uint256 fileId)
-    //     public
-    //     view
-    //     hasAccess(fileId)
-    //     returns (string memory)
-    // {
-    //     return fileToJson(files[fileId]);
-    // }
 
     function retreiveOwnedFiles()
         public
         view
-        returns (string[] memory, string[] memory, uint[] memory, uint[] memory)
+        returns (uint[] memory, string[] memory, string[] memory, uint[] memory, uint[] memory, bool[] memory)
     {
         return retrieveFiles(ownedFiles[msg.sender].values());
     }
@@ -134,7 +119,7 @@ contract AlphaShare {
     function retreiveFilesSharedWithMe()
         public
         view
-        returns (string[] memory, string[] memory, uint[] memory, uint[] memory)
+        returns (uint[] memory, string[] memory, string[] memory, uint[] memory, uint[] memory, bool[] memory)
     {
         return retrieveFiles(sharedWithMe[msg.sender].values());
     }
@@ -142,30 +127,111 @@ contract AlphaShare {
     function retrieveFilesSharedByMe()
         public
         view
-        returns (string[] memory, string[] memory, uint[] memory, uint[] memory)
+        returns (uint[] memory, string[] memory, string[] memory, uint[] memory, uint[] memory, bool[] memory)
     {
         return retrieveFiles(sharedByMe[msg.sender].values());
+    }
+
+    function retrievePublicFiles()
+        public
+        view
+        returns (uint[] memory, string[] memory, string[] memory, uint[] memory, uint[] memory, bool[] memory)
+    {
+        return retrieveFiles(publicFiles.values());
+    }
+
+    function retrieveAddressSharedWith (uint fileId) public view
+        fileOwner(fileId) returns (address[] memory)
+    {
+        return files[fileId].sharedWith.values();
+    }
+
+
+
+    /** INTERNAL FUNCTIONS... */
+
+    function addFile(
+        string calldata key,
+        string calldata ipfsHash,
+        uint256 size,
+        bool visibility
+    ) internal {
+        File storage file = files[fileCounter]; 
+        
+        file.id = fileCounter;
+        file.key = key;
+        file.ipfsHash = ipfsHash;
+        file.owner = msg.sender;
+        file.size = size;
+        file.visibility = visibility;
+        file.createdAt = block.timestamp;
+        file.isFolder = false;
+
+        ownedFiles[msg.sender].add(fileCounter);
+
+        // Update Public Files
+        addRemovePublic(fileCounter, visibility);
+
+        fileCounter++;
+
+        emit AddFile(file.id, key, ipfsHash, size, block.timestamp, visibility, msg.sender);
+    }
+
+    function startFileShare(uint256 fileId, address[] memory addresses)
+        internal
+        fileOwner(fileId)
+    {
+        for (uint256 j = 0; j < addresses.length; j++) {
+            File storage file = files[fileId];
+            file.sharedWith.add(addresses[j]);
+            sharedWithMe[addresses[j]].add(fileId);
+            sharedByMe[msg.sender].add(fileId);
+            emit StartFileShare(file.id, file.owner, addresses[j]);
+        }
+    }
+
+    function addRemovePublic(uint fileId, bool visibility) internal {
+        // Add or remove from public
+        if(visibility){
+            publicFiles.add((fileId));
+        }else{
+            publicFiles.remove(fileId);
+        }
+
+        emit UpdateVisibility(fileId, visibility);
+    }
+
+    function updateFilesAccess(uint256 fileId, bool visibility)
+        internal
+        fileOwner(fileId)
+    {
+        files[fileId].visibility = visibility;
+        addRemovePublic(fileId, visibility);
     }
 
     function retrieveFiles(uint[] memory fileIds)
         internal
         view
-        returns (string[] memory, string[] memory, uint[] memory, uint[] memory)
+        returns (uint[] memory, string[] memory, string[] memory, uint[] memory, uint[] memory, bool[] memory)
     {
+        uint[]  memory id = new uint[](fileIds.length);
         string[]  memory key = new string[](fileIds.length);
         string[]  memory ipfsHash = new string[](fileIds.length);
         uint[]  memory size = new uint[](fileIds.length);
         uint[]  memory createdAt = new uint[](fileIds.length);
+        bool[]  memory visibility = new bool[](fileIds.length);
 
         for (uint256 i = 0; i < fileIds.length; i++) {
-            File storage file = files[fileIds[i]];
+            uint fileId = fileIds[i];
+            File storage file = files[fileId];
+            id[i] = file.id;
             key[i] = file.key;
             ipfsHash[i] = file.ipfsHash;
             size[i] = file.size;
             createdAt[i] = file.createdAt;
-
+            visibility[i] = file.visibility;
         }
 
-        return (key, ipfsHash, size, createdAt);
+        return (id, key, ipfsHash, size, createdAt, visibility);
     }
 }
