@@ -232,11 +232,11 @@ export const NestedEditableFileBrowser = ({ tx, contract }) => {
 
   return (
     <>
-      <Button type={"primary"} onClick={loadFiles}>
+      <Button type={"primary"} style={{ marginTop: 10, marginBottom: 10 }} onClick={loadFiles}>
         Load Files
       </Button>{" "}
       &nbsp;
-      <Button type={"primary"} onClick={() => setIsModalVisible(true)}>
+      <Button type={"primary"} style={{ marginTop: 10, marginBottom: 10 }} onClick={() => setIsModalVisible(true)}>
         Addresses for share/unshare
       </Button>
       <Popconfirm
