@@ -249,6 +249,9 @@ function App(props) {
       {/* <TopNavbar /> */}
 
       <Switch>
+        <Route path="/">
+          <NestedEditableFileBrowser contract={writeContracts.AlphaShare} tx={tx} />
+        </Route>
         <Route path="/fileManager">
           <NestedEditableFileBrowser contract={writeContracts.AlphaShare} tx={tx} />
         </Route>
