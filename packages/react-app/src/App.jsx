@@ -237,7 +237,7 @@ function App(props) {
       />
       <Menu style={{ textAlign: "center", marginTop: 40 }} selectedKeys={[location.pathname]} mode="horizontal">
         <Menu.Item key="/filemanager">
-          <Link to="/fileManager">File Manager</Link>
+          <Link to="/fileManager">My Files</Link>
         </Menu.Item>
         <Menu.Item key="/sharedWithMe">
           <Link to="/sharedWithMe">Shared With Me</Link>
