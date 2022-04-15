@@ -44,6 +44,23 @@ describe("IPFS", function () {
         expect(file[5][0]).to.equal(false);
      });
     });
+
+    describe("File Sharing", function () {
+      it("share file", async function () {
+        await alphaShare.addFiles(["New file"], ["hjklhklijllkjsf"], [34], [true]);
+        await alphaShare.startFileShares([1], ["0x01be23585060835e02b77ef475b0cc51aa1e0709"]);
+        const file = await alphaShare.retrieveFilesSharedByMe()
+        expect(file[2][0]).to.equal("hjklhklijllkjsf");
+       
+      })
+
+      it("stop sharing the file with 0x01be23585060835e02b77ef475b0cc51aa1e0709", async function () {
+        await alphaShare.stopShare([1], ["0x01be23585060835e02b77ef475b0cc51aa1e0709"]);
+        const file = await alphaShare.retrieveFilesSharedByMe()
+        expect(file[2][0]).to.equal(undefined);
+      })
+    })
+
     describe("Access to file", function () {
       it("should not share if you are not the file owner", async function () {
         await alphaShare.connect(owner).addFiles(["New file"], ["hjklhklijllkjsf"], [34], [true])
@@ -54,6 +71,6 @@ describe("IPFS", function () {
         await alphaShare.connect(owner).addFiles(["New file"], ["hjklhklijllkjsf"], [34], [true])
        await expect(alphaShare.connect(addr1).stopShare(1, ["0x6BB12976bdaE76f22D6FFFBD5D1c0125dD566936"])).to.be.revertedWith("You are not the file owner")
       })
-    })
+    });
   });
 });
