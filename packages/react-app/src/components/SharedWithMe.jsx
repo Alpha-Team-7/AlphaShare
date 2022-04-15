@@ -28,7 +28,7 @@ const SharedWithMe = ({ tx, contract }) => {
 
   return (
     <>
-      <Button type={"primary"} onClick={loadFiles}>
+      <Button type={"primary"} style={{ marginTop: 10, marginBottom: 10 }} onClick={loadFiles}>
         Load Files
       </Button>{" "}
       &nbsp;
