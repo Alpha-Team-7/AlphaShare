@@ -38,8 +38,20 @@ describe("IPFS", function () {
         const file = await alphaShare.retreiveOwnedFiles()
 
         expect(file[5][0]).to.equal(false);
-     });     
+     });
 
+
+     
+
+      // it("Should emit a SetPurpose event ", async function () {
+      //   const [owner] = await ethers.getSigners();
+
+      //   const newPurpose = "Another Test Purpose";
+
+      //   expect(await alphaShare.setPurpose(newPurpose))
+      //     .to.emit(alphaShare, "SetPurpose")
+      //     .withArgs(owner.address, newPurpose);
+      // });
     });
   });
 });
