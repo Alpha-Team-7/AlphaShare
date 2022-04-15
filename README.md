@@ -53,13 +53,19 @@ yarn deploy
 This documentation is segmented into developer-focused messages and end-user-facing messages. These messages may be shown to the end user (the human) at the time that they will interact with the contract (i.e. sign a transaction).
 
 @title - Title that describes the contract
+<br/>
 @author - Name of the author
+<br/>
 @notice - Explains to an end user what a function does
+<br/>
 @dev - Explains to a developer any extra details
+<br/>
 @param - Documents a single parameter from functions and events
+<br/>
 @return - Documents one or all return variable(s) from a function
+<br/>
 
-User and Developer Documentation can be found [here]()
+User and Developer Documentation can be found [here](https://github.com/Alpha-Team-7/AlphaShare/blob/master/documentation.json)
 
 # 🔭 Learning Solidity
 
