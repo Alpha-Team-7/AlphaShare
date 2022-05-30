@@ -5,7 +5,7 @@
 > everything you need to know about AlphaShare Decentralized file storage! 🚀
 
 Live Demo
-Check out the live demo here: http://alphashare.surge.sh/
+Check out the live demo here: https://gentle-polish.surge.sh/
 ![AlphaShareDemo Image](AlphaShareDemo.png)
 
 # 🏄‍♂️ Quick Start
